@@ -3,202 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pilotage Pédagogique TSMEL - AFPA St-Pierre</title>
+    <title>Suivi TSMEL - Expert Pédagogique</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #2c3e50; --success: #27ae60; --info: #3498db; --warning: #f39c12; --danger: #e74c3c; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 11.5px; color: #333; margin: 0; padding: 15px; background: var(--bg); }
-        .container { max-width: 1450px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        
+        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --info: #3498db; --accent: #8e44ad; --warning: #f39c12; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #333; margin: 0; padding: 20px; background: #f0f2f5; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         header { text-align: center; border-bottom: 3px solid var(--primary); margin-bottom: 25px; padding-bottom: 10px; }
-        h1 { font-size: 19px; text-transform: uppercase; margin: 0; color: var(--primary); }
+        h1 { font-size: 20px; text-transform: uppercase; margin: 0; color: var(--primary); }
         
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
         .tab-btn { padding: 12px 20px; border: none; background: #eee; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
         .tab-btn.active { background: var(--primary); color: white; }
-        
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        h2 { background: var(--primary); color: white; padding: 10px; font-size: 14px; margin-top: 25px; border-radius: 4px; text-transform: uppercase; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        h2 { background: var(--primary); color: white; padding: 10px 15px; font-size: 16px; margin-top: 30px; border-radius: 4px; display: flex; justify-content: space-between; }
+        h2.transversal { background: var(--accent); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
         th, td { border: 1px solid #bdc3c7; padding: 10px; vertical-align: top; }
-        th { background: #f2f2f2; font-size: 10.5px; text-transform: uppercase; color: var(--primary); }
-
-        .critere-list { font-size: 10px; color: #555; margin: 5px 0 0 15px; padding: 0; list-style-type: square; }
-        .help-box { font-size: 10px; color: var(--warning); background: #fffdf0; border: 1px dashed var(--warning); padding: 8px; margin-top: 8px; border-radius: 4px; line-height: 1.4; }
+        th { background: #f8f9fa; font-size: 11px; text-transform: uppercase; color: var(--primary); }
         
-        .saveable { width: 100%; border: 1px solid #dfe6e9; padding: 6px; box-sizing: border-box; font-size: 11.5px; border-radius: 3px; }
-        textarea.saveable { height: 100px; resize: vertical; }
+        .saveable { width: 100%; border: 1px solid #dfe6e9; padding: 6px; box-sizing: border-box; border-radius: 3px; }
+        textarea.saveable { height: 60px; resize: vertical; }
+        input[type="number"].saveable { text-align: center; font-weight: bold; }
         
-        .chart-container { width: 500px; margin: 0 auto 30px auto; background: white; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
-
+        .critere-list { font-size: 11px; color: #555; margin: 5px 0 0 15px; padding: 0; list-style-type: square; }
+        .chart-container { width: 500px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
         .controls { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 20px; }
-        .btn { padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; color: white; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+        .btn { padding: 10px 18px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; color: white; transition: opacity 0.2s; }
+        .btn-print { background: var(--success); }
+        .btn-export { background: var(--info); }
+        .btn-clear { background: var(--danger); }
 
         @media print {
             .no-print, .nav-tabs { display: none !important; }
             .tab-content { display: block !important; page-break-after: always; }
             body { background: white; padding: 0; }
-            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
-            textarea.saveable { border: none !important; height: auto; min-height: 60px; }
+            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
+            textarea, input, select { border: none !important; appearance: none; background: transparent; }
+            h2 { border: 1px solid #000; color: black !important; background: #eee !important; }
         }
     </style>
 </head>
 <body>
 
-<div class="controls no-print">
-    <button class="btn" style="background:var(--danger)" onclick="clearData()">Réinitialiser le suivi</button>
-    <button class="btn" style="background:var(--info)" onclick="exportCSV()">Exporter Excel (CSV)</button>
-    <button class="btn" style="background:var(--success)" onclick="window.print()">Imprimer le Dossier Complet</button>
-</div>
-
 <div class="container">
     <header>
-        <h1>Livret de Suivi Pédagogique TSMEL</h1>
-        <p><strong>Technicien Supérieur en Méthodes et Exploitation Logistique - Niveau 5</strong></p>
+        <h1>Tableau de Suivi de Progression TSMEL</h1>
+        <p><em>Référentiel REAC v10 - AFPA Réunion</em></p>
     </header>
 
-    <nav class="nav-tabs no-print">
-        <button class="tab-btn active" onclick="showTab('dashboard')">1. Synthèse Formateur & ECF</button>
-        <button class="tab-btn" onclick="showTab('autoeval')">2. Ma Progression (Apprenant)</button>
-        <button class="tab-btn" onclick="showTab('transverse')">3. Compétences Transversales</button>
-    </nav>
-
-    <div id="dashboard" class="tab-content active">
-        <section>
-            <h2>AT 1 : Piloter les activités du site logistique</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:30%">Compétence Professionnelle (REAC)</th>
-                        <th style="width:40%">Critères de Performance (Attendus)</th>
-                        <th style="width:12%">Résultat ECF</th>
-                        <th style="width:18%">Observations</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>CP 1 :</strong> Organiser et réguler les activités logistiques du site</td>
-                        <td><ul class="critere-list"><li>Réglementation sociale respectée</li><li>Niveaux de productivité/rentabilité atteints</li><li>Dispositifs réglementaires d'entreposage respectés</li><li>Cahiers des charges clients respectés</li></ul></td>
-                        <td><select id="r1" class="saveable"><option>-</option><option>Satisfaisant</option><option>À renforcer</option></select></td>
-                        <td><textarea id="o1" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 2 :</strong> Manager les équipes opérationnelles du site</td>
-                        <td><ul class="critere-list"><li>Orientations stratégiques communiquées</li><li>Politique RH et cadres d'entretiens respectés</li><li>Inclusion handicap et aménagements intégrés</li><li>Besoins de formation définis</li></ul></td>
-                        <td><select id="r2" class="saveable"><option>-</option><option>Satisfaisant</option><option>À renforcer</option></select></td>
-                        <td><textarea id="o2" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 3 :</strong> Déterminer et exploiter les indicateurs logistiques</td>
-                        <td><ul class="critere-list"><li>Pertinence des indicateurs (KPI)</li><li>Ratios communiqués aux tiers</li><li>Écarts et causes identifiés précisément</li><li>Solutions d'amélioration déterminées</li></ul></td>
-                        <td><select id="r3" class="saveable"><option>-</option><option>Satisfaisant</option><option>À renforcer</option></select></td>
-                        <td><textarea id="o3" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 4 :</strong> Repérer et traiter les dysfonctionnements... y compris en anglais</td>
-                        <td><ul class="critere-list"><li>Causes des dérives/dysfonctionnements identifiées</li><li>Pertinence des actions correctives</li><li>Communication fluide (incl. anglais niveau B1)</li><li>Règles QSE (Hygiène, Sécurité, Qualité) appliquées</li></ul></td>
-                        <td><select id="r4" class="saveable"><option>-</option><option>Satisfaisant</option><option>À renforcer</option></select></td>
-                        <td><textarea id="o4" class="saveable"></textarea></td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-
-        <section>
-            <h2>AT 2 : Élaborer et mettre en œuvre des solutions techniques</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:30%">Compétence Professionnelle (REAC)</th>
-                        <th style="width:40%">Critères de Performance (Attendus)</th>
-                        <th style="width:12%">Résultat ECF</th>
-                        <th style="width:18%">Observations</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>CP 5 :</strong> Effectuer une étude de faisabilité technique et économique d’un projet logistique</td>
-                        <td><ul class="critere-list"><li>Analyse exhaustive des besoins site/clients</li><li>Optimisation coût / qualité de service</li><li>Impact conditions de travail/handicap intégré</li><li>Argumentation des solutions (incl. anglais)</li></ul></td>
-                        <td><select id="r5" class="saveable"><option>-</option><option>Satisfaisant</option><option>À renforcer</option></select></td>
-                        <td><textarea id="o5" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 6 :</strong> Définir et conduire un plan d’actions dans le cadre du déploiement...</td>
-                        <td><ul class="critere-list"><li>Actions, durées et moyens identifiés</li><li>Maîtrise du chemin critique et des jalons</li><li>Respect du budget alloué</li><li>Actualisation du planning de déploiement</li></ul></td>
-                        <td><select id="r6" class="saveable"><option>-</option><option>Satisfaisant</option><option>À renforcer</option></select></td>
-                        <td><textarea id="o6" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 7 :</strong> Rationaliser l’agencement des zones logistiques et l’implantation des produits</td>
-                        <td><ul class="critere-list"><li>Flux optimisés / Productivité atteinte</li><li>Conservation des produits respectée</li><li>Règles de sécurité/sûreté du fret appliquées</li><li>Paramétrage WMS cohérent</li></ul></td>
-                        <td><select id="r7" class="saveable"><option>-</option><option>Satisfaisant</option><option>À renforcer</option></select></td>
-                        <td><textarea id="o7" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 8 :</strong> Élaborer des procédures de travail adaptées aux activités logistiques</td>
-                        <td><ul class="critere-list"><li>Procédures conformes au déroulement réel</li><li>Compréhension vérifiée auprès des équipes</li><li>Mise à jour régulière des standards</li><li>Respect des normes QSE</li></ul></td>
-                        <td><select id="r8" class="saveable"><option>-</option><option>Satisfaisant</option><option>À renforcer</option></select></td>
-                        <td><textarea id="o8" class="saveable"></textarea></td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
+    <div class="controls no-print">
+        <button class="btn btn-clear" onclick="clearData()">Réinitialiser</button>
+        <button class="btn btn-export" onclick="exportToCSV()">Exporter Excel (CSV)</button>
+        <button class="btn btn-print" onclick="window.print()">Imprimer PDF</button>
     </div>
 
-    <div id="autoeval" class="tab-content">
-        <div class="chart-container"><canvas id="radarChart"></canvas></div>
-        <h2>Ma Progression (Auto-évaluation 1 à 4)</h2>
-        <table>
-            <thead><tr><th style="width:40%">Compétence & Critères de Maîtrise</th><th style="width:10%">Note</th><th style="width:50%">Auto-analyse : Ce que j'ai réalisé (Aide à la rédaction)</th></tr></thead>
-            <tbody>
-                <tr>
-                    <td><strong>CP 1 : Organisation & Flux</strong><br><span class="critere-list">Régulation des charges, planning, social.</span></td>
-                    <td><input type="number" id="ae1" min="1" max="4" class="saveable radar-input"></td>
-                    <td><textarea id="at1" class="saveable" placeholder="Décrivez une action concrète..."></textarea>
-                    <div class="help-box">💡 <strong>Aide :</strong> "J'ai planifié l'activité de 15 préparateurs sur Excel en intégrant les pics de réception et les repos hebdomadaires."</div></td>
-                </tr>
-                <tr>
-                    <td><strong>CP 7 : Agencement & Implantation</strong><br><span class="critere-list">Optimisation picking, paramétrage WMS.</span></td>
-                    <td><input type="number" id="ae7" min="1" max="4" class="saveable radar-input"></td>
-                    <td><textarea id="at7" class="saveable"></textarea>
-                    <div class="help-box">💡 <strong>Aide :</strong> "J'ai réimplanté les produits 'Classe A' au plus proche de la zone d'expédition pour réduire les temps de parcours de 20%."</div></td>
-                </tr>
-                </tbody>
-        </table>
+    <div class="nav-tabs no-print">
+        <button class="tab-btn active" onclick="showTab('tab1')">1. Évaluation Formateur</button>
+        <button class="tab-btn" onclick="showTab('tab2')">2. Auto-évaluation & Progression</button>
     </div>
 
-    <div id="transverse" class="tab-content">
-        <h2>Fiche des Compétences Transversales de l'Emploi Type</h2>
+    <!-- TAB 1 : EVALUATION FORMATEUR -->
+    <div id="tab1" class="tab-content active">
+        <h2>AT 1 : Piloter les activités du site logistique</h2>
         <table>
             <thead>
-                <tr><th style="width:30%">Libellé CT (REAC)</th><th style="width:45%">Processus de mise en œuvre & Critères</th><th style="width:25%">Évaluation / Preuves</th></tr>
+                <tr>
+                    <th width="40%">Compétence Professionnelle & Objectifs</th>
+                    <th width="35%">Critères de Performance (Attendus)</th>
+                    <th width="10%">Statut</th>
+                    <th width="15%">Observations</th>
+                </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td><strong>CT 1 : Communiquer avec différents interlocuteurs</strong></td>
-                    <td>
-                        <p><em>Processus :</em> Communiquer à l'écrit et à l'oral pour partager les informations avec la hiérarchie, collaborateurs, clients, fournisseurs et prestataires. Adapter sa communication.</p>
-                        <ul class="critere-list">
-                            <li>Les informations nécessaires sont partagées avec les interlocuteurs concernés</li>
-                            <li>La communication est adaptée aux différents interlocuteurs</li>
-                        </ul>
-                    </td>
-                    <td><textarea id="ct1_v" class="saveable"></textarea></td>
+                    <td><strong>CP 1 :</strong> Organiser et réguler les activités logistiques</td>
+                    <td><ul class="critere-list"><li>Réglementation sociale respectée</li><li>Niveaux de productivité atteints</li><li>Cahiers des charges respectés</li></ul></td>
+                    <td><select id="cp1_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="cp1_o" class="saveable"></textarea></td>
                 </tr>
                 <tr>
-                    <td><strong>CT 2 : Mettre en œuvre et faire respecter des règles et des procédures</strong></td>
-                    <td>
-                        <p><em>Processus :</em> Garantir le niveau de service, la sécurité des marchandises, des biens, des données numériques et préserver la santé des personnes.</p>
-                        <ul class="critere-list">
-                            <li>Les règles d'hygiène, sécurité, sûreté et qualité sont respectées</li>
-                            <li>Le niveau de service visé est atteint</li>
-                            <li>La sauvegarde de l'intégrité des systèmes d'information est assurée</li>
-                        </ul>
-                    </td>
-                    <td><textarea id="ct2_v" class="saveable"></textarea></td>
+                    <td><strong>CP 2 :</strong> Manager les équipes opérationnelles</td>
+                    <td><ul class="critere-list"><li>Orientations stratégiques communiquées</li><li>Politique RH respectée</li><li>Besoins de formation définis</li></ul></td>
+                    <td><select id="cp2_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="cp2_o" class="saveable"></textarea></td>
                 </tr>
+                <tr>
+                    <td><strong>CP 3 :</strong> Déterminer et exploiter les indicateurs</td>
+                    <td><ul class="critere-list"><li>Pertinence des indicateurs (KPI)</li><li>Écarts et causes identifiés</li><li>Solutions d'amélioration déterminées</li></ul></td>
+                    <td><select id="cp3_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="cp3_o" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 4 :</strong> Repérer et traiter les dysfonctionnements (incl. Anglais)</td>
+                    <td><ul class="critere-list"><li>Causes identifiées précisément</li><li>Actions correctives pertinentes</li><li>Communication fluide (Anglais B1)</li></ul></td>
+                    <td><select id="cp4_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="cp4_o" class="saveable"></textarea></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>AT 2 : Solutions techniques et Méthodes</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th width="40%">Compétence Professionnelle & Objectifs</th>
+                    <th width="35%">Critères de Performance (Attendus)</th>
+                    <th width="10%">Statut</th>
+                    <th width="15%">Observations</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>CP 5 :</strong> Étude de faisabilité technique et économique</td>
+                    <td><ul class="critere-list"><li>Analyse exhaustive des besoins</li><li>Optimisation coût/qualité</li><li>Impact conditions de travail intégré</li></ul></td>
+                    <td><select id="cp5_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="cp5_o" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 6 :</strong> Définir et conduire un plan d'actions</td>
+                    <td><ul class="critere-list"><li>Actions, durées et moyens identifiés</li><li>Maîtrise du chemin critique</li><li>Respect du budget alloué</li></ul></td>
+                    <td><select id="cp6_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="cp6_o" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 7 :</strong> Rationaliser agencement et implantation</td>
+                    <td><ul class="critere-list"><li>Flux optimisés / Productivité</li><li>Conservation produits respectée</li><li>Règles sécurité/sûreté appliquées</li></ul></td>
+                    <td><select id="cp7_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="cp7_o" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 8 :</strong> Élaborer des procédures de travail</td>
+                    <td><ul class="critere-list"><li>Procédures conformes au réel</li><li>Compréhension vérifiée des équipes</li><li>Respect des normes QSE</li></ul></td>
+                    <td><select id="cp8_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="cp8_o" class="saveable"></textarea></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- TAB 2 : AUTO-EVALUATION -->
+    <div id="tab2" class="tab-content">
+        <h2>Ma Progression (Auto-évaluation)</h2>
+        <div class="chart-container no-print">
+            <canvas id="radarChart"></canvas>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th width="50%">Compétence & Objectifs de Maîtrise</th>
+                    <th width="10%">Note (1-4)</th>
+                    <th width="40%">Auto-analyse : Ce que j'ai réalisé / Preuves</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>CP 1 : Organisation & Flux</strong></td><td><input type="number" id="ae1" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen1" class="saveable"></textarea></td></tr>
+                <tr><td><strong>CP 2 : Management d'Équipe</strong></td><td><input type="number" id="ae2" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen2" class="saveable"></textarea></td></tr>
+                <tr><td><strong>CP 3 : Pilotage par Indicateurs</strong></td><td><input type="number" id="ae3" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen3" class="saveable"></textarea></td></tr>
+                <tr><td><strong>CP 4 : Qualité & Anglais Pro</strong></td><td><input type="number" id="ae4" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen4" class="saveable"></textarea></td></tr>
+                <tr><td><strong>CP 5 : Étude de Faisabilité</strong></td><td><input type="number" id="ae5" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen5" class="saveable"></textarea></td></tr>
+                <tr><td><strong>CP 6 : Gestion de Projet</strong></td><td><input type="number" id="ae6" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen6" class="saveable"></textarea></td></tr>
+                <tr><td><strong>CP 7 : Agencement & WMS</strong></td><td><input type="number" id="ae7" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen7" class="saveable"></textarea></td></tr>
+                <tr><td><strong>CP 8 : Standardisation & QSE</strong></td><td><input type="number" id="ae8" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen8" class="saveable"></textarea></td></tr>
             </tbody>
         </table>
     </div>
@@ -234,37 +202,49 @@
         const d = [];
         for(let i=1; i<=8; i++) {
             const val = document.getElementById('ae'+i);
-            d.push(val ? val.value : 0);
+            d.push(val ? (val.value || 0) : 0);
         }
         radar.data.datasets[0].data = d;
         radar.update();
     }
 
-    const fields = document.querySelectorAll('.saveable');
+    const saveables = document.querySelectorAll('.saveable');
     function save() {
         const data = {};
-        fields.forEach(f => data[f.id] = f.value);
-        localStorage.setItem('tsmel_v12_final', JSON.stringify(data));
-        updateRadar();
+        saveables.forEach(f => data[f.id] = f.value);
+        localStorage.setItem('tsmel_progression_data', JSON.stringify(data));
+        if(event && event.target.classList.contains('radar-input')) updateRadar();
     }
+
     function load() {
-        const d = JSON.parse(localStorage.getItem('tsmel_v12_final'));
-        if(d) fields.forEach(f => { if(d[f.id]) f.value = d[f.id]; });
+        const data = JSON.parse(localStorage.getItem('tsmel_progression_data'));
+        if(data) saveables.forEach(f => {
+            if(data[f.id] !== undefined) f.value = data[f.id];
+        });
         updateRadar();
     }
 
-    fields.forEach(f => f.addEventListener('input', save));
+    saveables.forEach(f => f.addEventListener('input', save));
     window.onload = () => { initRadar(); load(); };
 
-    function clearData() { if(confirm("Réinitialiser le suivi ?")) { localStorage.removeItem('tsmel_v12_final'); location.reload(); } }
-    
-    function exportCSV() {
-        let csv = "\ufeffSection;Compétence;Valeur\n";
-        fields.forEach(f => csv += `TSMEL;${f.id};"${f.value.replace(/"/g, '""').replace(/(\n|\r)/g, ' ')}"\n`);
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    function clearData() {
+        if(confirm("Effacer tout le suivi ?")) {
+            localStorage.removeItem('tsmel_progression_data');
+            location.reload();
+        }
+    }
+
+    function exportToCSV() {
+        let csv = "ID;Valeur
+";
+        saveables.forEach(f => {
+            csv += `${f.id};"${f.value.replace(/"/g, '""')}"
+`;
+        });
+        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "suivi_pedagogique_tsmel_v12.csv";
+        link.download = "suivi_tsmel.csv";
         link.click();
     }
 </script>
