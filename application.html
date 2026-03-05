@@ -3,31 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSMEL - Pilotage Pédagogique REAC</title>
+    <title>TSMEL - Pilotage Pédagogique REAC Expert</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #2c3e50; --success: #27ae60; --info: #3498db; --danger: #e74c3c; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; color: #333; margin: 0; padding: 20px; background: #f8f9fa; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        :root { --primary: #2c3e50; --success: #27ae60; --info: #3498db; --danger: #e74c3c; --help: #f39c12; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #333; margin: 0; padding: 15px; background: #f0f2f5; }
+        .container { max-width: 1400px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        header { text-align: center; border-bottom: 3px solid var(--primary); margin-bottom: 25px; padding-bottom: 10px; }
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
-        .tab-btn { padding: 12px 20px; border: none; background: #eee; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        header { text-align: center; border-bottom: 3px solid var(--primary); margin-bottom: 20px; padding-bottom: 10px; }
+        .nav-tabs { display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 2px solid #ddd; padding-bottom: 8px; }
+        .tab-btn { padding: 10px 15px; border: none; background: #eee; cursor: pointer; border-radius: 5px; font-weight: bold; }
         .tab-btn.active { background: var(--primary); color: white; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        h2 { background: var(--primary); color: white; padding: 10px; font-size: 14px; margin-top: 25px; border-radius: 4px; text-transform: uppercase; }
+        h2 { background: var(--primary); color: white; padding: 8px; font-size: 13px; margin-top: 20px; border-radius: 4px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
         th, td { border: 1px solid #bdc3c7; padding: 8px; vertical-align: top; overflow: hidden; }
-        th { background: #f2f2f2; font-size: 11px; text-transform: uppercase; }
+        th { background: #f8f9fa; font-size: 10px; text-transform: uppercase; }
 
-        .obj-list { font-size: 11px; color: #555; margin: 5px 0 0 15px; padding: 0; list-style-type: square; }
-        .saveable { width: 100%; border: 1px solid #dfe6e9; padding: 5px; box-sizing: border-box; font-size: 12px; }
-        textarea.saveable { height: 60px; }
+        .critere-list { font-size: 10px; color: #555; margin: 5px 0 0 12px; padding: 0; list-style-type: square; }
+        .help-box { font-size: 10px; color: var(--help); background: #fffdf0; border: 1px dashed var(--help); padding: 5px; margin-top: 5px; border-radius: 4px; }
         
-        .chart-box { width: 500px; margin: 20px auto; background: white; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .saveable { width: 100%; border: 1px solid #dfe6e9; padding: 5px; box-sizing: border-box; font-size: 11px; border-radius: 3px; }
+        textarea.saveable { height: 90px; }
+        
+        .chart-container { width: 450px; margin: 0 auto 20px auto; background: white; padding: 10px; border: 1px solid #eee; border-radius: 8px; }
 
         .controls { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 15px; }
         .btn { padding: 8px 15px; border: none; cursor: pointer; border-radius: 4px; color: white; font-weight: bold; }
@@ -36,7 +38,7 @@
             .no-print, .nav-tabs { display: none !important; }
             .tab-content { display: block !important; page-break-after: always; }
             body { background: white; padding: 0; }
-            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            textarea.saveable { border: none !important; height: auto; min-height: 50px; }
         }
     </style>
 </head>
@@ -44,19 +46,20 @@
 
 <div class="controls no-print">
     <button class="btn" style="background:var(--danger)" onclick="clearData()">Réinitialiser</button>
-    <button class="btn" style="background:var(--info)" onclick="exportCSV()">Export CSV</button>
-    <button class="btn" style="background:var(--success)" onclick="window.print()">Imprimer PDF</button>
+    <button class="btn" style="background:var(--info)" onclick="exportCSV()">Exporter Excel</button>
+    <button class="btn" style="background:var(--success)" onclick="window.print()">Imprimer Dossier</button>
 </div>
 
 <div class="container">
     <header>
-        <h1>Suivi des Compétences TSMEL (Niveau 5)</h1>
-        <p><em>Conformité REAC 2023 - AFPA Saint-Pierre</em></p>
+        <h1>Tableau de Pilotage des Compétences TSMEL</h1>
+        <p><strong>Niveau 5 - Conformité REAC & Critères de Performance</strong></p>
     </header>
 
     <nav class="nav-tabs no-print">
-        <button class="tab-btn active" onclick="showTab('dashboard')">Synthèse & ECF Formateur</button>
-        <button class="tab-btn" onclick="showTab('autoeval')">Auto-évaluation Apprenant</button>
+        <button class="tab-btn active" onclick="showTab('dashboard')">Synthèse & ECF (Formateur)</button>
+        <button class="tab-btn" onclick="showTab('autoeval')">Ma Progression (Apprenant)</button>
+        <button class="tab-btn" onclick="showTab('transverse')">Compétences Transversales</button>
     </nav>
 
     <div id="dashboard" class="tab-content active">
@@ -65,74 +68,74 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width:35%">Libellé Exact de la Compétence (REAC)</th>
-                        <th style="width:15%">Objectifs</th>
-                        <th style="width:15%">Résultat ECF</th>
-                        <th style="width:35%">Observations Pédagogiques</th>
+                        <th style="width:25%">Compétence (Libellé REAC)</th>
+                        <th style="width:40%">Critères de Performance & Objectifs</th>
+                        <th style="width:10%">ECF</th>
+                        <th style="width:25%">Commentaire Formateur</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><strong>CP 1 :</strong> Organiser et réguler les activités logistiques du site</td>
-                        <td><ul class="obj-list"><li>Planification RH/Matériel</li><li>Réglementation</li></ul></td>
+                        <td><ul class="critere-list"><li>Réglementation sociale respectée</li><li>Niveaux de productivité atteints</li><li>Dispositifs réglementaires entreposage OK</li><li>Cahiers des charges respectés</li></ul></td>
                         <td><select id="r1" class="saveable"><option>-</option><option>Satisfaisant</option><option>À renforcer</option></select></td>
-                        <td><textarea id="o1" class="saveable" placeholder="ECF 1..."></textarea></td>
+                        <td><textarea id="o1" class="saveable"></textarea></td>
                     </tr>
                     <tr>
                         <td><strong>CP 2 :</strong> Manager les équipes opérationnelles du site</td>
-                        <td><ul class="obj-list"><li>Entretiens/Régulation</li><li>Inclusion handicap</li></ul></td>
+                        <td><ul class="critere-list"><li>Orientations stratégiques communiquées</li><li>Politique RH/Sociale respectée</li><li>Adaptations handicap prises en compte</li><li>Performances évaluées / Régulation</li></ul></td>
                         <td><select id="r2" class="saveable"><option>-</option><option>Satisfaisant</option><option>À renforcer</option></select></td>
-                        <td><textarea id="o2" class="saveable" placeholder="ECF 2..."></textarea></td>
+                        <td><textarea id="o2" class="saveable"></textarea></td>
                     </tr>
                     <tr>
                         <td><strong>CP 3 :</strong> Déterminer et exploiter les indicateurs logistiques</td>
-                        <td><ul class="obj-list"><li>KPI/Tableaux de bord</li><li>Analyse des écarts</li></ul></td>
+                        <td><ul class="critere-list"><li>Pertinence des KPI / Tableaux de bord</li><li>Communication des ratios aux tiers</li><li>Identification causes d'écarts</li><li>Solutions d'amélioration déterminées</li></ul></td>
                         <td><select id="r3" class="saveable"><option>-</option><option>Satisfaisant</option><option>À renforcer</option></select></td>
-                        <td><textarea id="o3" class="saveable" placeholder="ECF 2..."></textarea></td>
+                        <td><textarea id="o3" class="saveable"></textarea></td>
                     </tr>
                     <tr>
-                        <td><strong>CP 4 :</strong> Repérer et traiter les dysfonctionnements et dérives de l’exploitation logistique, y compris en anglais</td>
-                        <td><ul class="obj-list"><li>Actions correctives</li><li>Anglais B1</li></ul></td>
+                        <td><strong>CP 4 :</strong> Repérer et traiter les dysfonctionnements [...] y compris en anglais</td>
+                        <td><ul class="critere-list"><li>Causes dérives identifiées</li><li>Actions correctives pertinentes</li><li>Qualité de service maintenue</li><li>Anglais B1 maîtrisé en situation</li></ul></td>
                         <td><select id="r4" class="saveable"><option>-</option><option>Satisfaisant</option><option>À renforcer</option></select></td>
-                        <td><textarea id="o4" class="saveable" placeholder="ECF 3..."></textarea></td>
+                        <td><textarea id="o4" class="saveable"></textarea></td>
                     </tr>
                 </tbody>
             </table>
         </section>
 
         <section>
-            <h2>AT 2 : Solutions techniques et Méthodes</h2>
+            <h2>AT 2 : Élaborer et mettre en œuvre des solutions techniques</h2>
             <table>
                 <thead>
                     <tr>
-                        <th style="width:35%">Libellé Exact de la Compétence (REAC)</th>
-                        <th style="width:15%">Objectifs</th>
-                        <th style="width:15%">Résultat ECF</th>
-                        <th style="width:35%">Observations Pédagogiques</th>
+                        <th style="width:25%">Compétence (Libellé REAC)</th>
+                        <th style="width:40%">Critères de Performance & Objectifs</th>
+                        <th style="width:10%">ECF</th>
+                        <th style="width:25%">Commentaire Formateur</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><strong>CP 5 :</strong> Effectuer une étude de faisabilité technique et économique d’un projet logistique</td>
-                        <td><ul class="obj-list"><li>Simulation coûts/qualité</li><li>Argumentation EN</li></ul></td>
+                        <td><ul class="critere-list"><li>Analyse besoins site/clients exhaustive</li><li>Optimisation coût/qualité</li><li>Impact conditions travail/handicap intégré</li><li>Solutions argumentées (incl. Anglais)</li></ul></td>
                         <td><select id="r5" class="saveable"><option>-</option><option>Satisfaisant</option></select></td>
                         <td><textarea id="o5" class="saveable"></textarea></td>
                     </tr>
                     <tr>
-                        <td><strong>CP 6 :</strong> Définir et conduire un plan d’actions dans le cadre du déploiement d’une solution logistique</td>
-                        <td><ul class="obj-list"><li>Jalons/Gantt</li><li>Chemin critique</li></ul></td>
+                        <td><strong>CP 6 :</strong> Définir et conduire un plan d’actions [...] solution logistique</td>
+                        <td><ul class="critere-list"><li>Identification étapes/moyens sans ambiguïté</li><li>Maîtrise chemin critique / Jalons</li><li>Respect budget / Actualisation planning</li></ul></td>
                         <td><select id="r6" class="saveable"><option>-</option><option>Satisfaisant</option></select></td>
                         <td><textarea id="o6" class="saveable"></textarea></td>
                     </tr>
                     <tr>
                         <td><strong>CP 7 :</strong> Rationaliser l’agencement des zones logistiques et l’implantation des produits</td>
-                        <td><ul class="obj-list"><li>Adressage/WMS</li><li>Slotting produits</li></ul></td>
+                        <td><ul class="critere-list"><li>Efficience agencement / Flux optimisés</li><li>Conservation produits respectée</li><li>Règles sécurité/sûreté fret appliquées</li><li>Paramétrage WMS cohérent</li></ul></td>
                         <td><select id="r7" class="saveable"><option>-</option><option>Satisfaisant</option></select></td>
                         <td><textarea id="o7" class="saveable"></textarea></td>
                     </tr>
                     <tr>
                         <td><strong>CP 8 :</strong> Élaborer des procédures de travail adaptées aux activités logistiques</td>
-                        <td><ul class="obj-list"><li>SOP/Qualité</li><li>Sécurité des biens</li></ul></td>
+                        <td><ul class="critere-list"><li>Procédures conformes au réel</li><li>Compréhension vérifiée auprès des équipes</li><li>Mise à jour régulière / Respect QSE</li></ul></td>
                         <td><select id="r8" class="saveable"><option>-</option><option>Satisfaisant</option></select></td>
                         <td><textarea id="o8" class="saveable"></textarea></td>
                     </tr>
@@ -142,19 +145,100 @@
     </div>
 
     <div id="autoeval" class="tab-content">
-        <div class="chart-box"><canvas id="radarChart"></canvas></div>
-        <h2>Ma Progression Apprenant</h2>
+        <div class="chart-container"><canvas id="radarChart"></canvas></div>
+        <h2>Ma Progression (Auto-évaluation & Preuves)</h2>
         <table>
-            <thead><tr><th style="width:5%">#</th><th style="width:40%">Compétence (Libellé REAC Officiel)</th><th style="width:10%">Note (1-4)</th><th style="width:45%">Analyse de pratique</th></tr></thead>
+            <thead><tr><th style="width:40%">Compétence & Critères REAC</th><th style="width:10%">Note (1-4)</th><th style="width:50%">Auto-analyse : Ce que j'ai réalisé (Aide en orange)</th></tr></thead>
             <tbody>
-                <tr><td>CP1</td><td>Organiser et réguler les activités logistiques du site</td><td><input type="number" id="ae1" min="1" max="4" class="saveable radar-in"></td><td><textarea id="at1" class="saveable"></textarea></td></tr>
-                <tr><td>CP2</td><td>Manager les équipes opérationnelles du site</td><td><input type="number" id="ae2" min="1" max="4" class="saveable radar-in"></td><td><textarea id="at2" class="saveable"></textarea></td></tr>
-                <tr><td>CP3</td><td>Déterminer et exploiter les indicateurs logistiques</td><td><input type="number" id="ae3" min="1" max="4" class="saveable radar-in"></td><td><textarea id="at3" class="saveable"></textarea></td></tr>
-                <tr><td>CP4</td><td>Repérer et traiter les dysfonctionnements et dérives de l'exploitation logistique, y compris en anglais</td><td><input type="number" id="ae4" min="1" max="4" class="saveable radar-in"></td><td><textarea id="at4" class="saveable"></textarea></td></tr>
-                <tr><td>CP5</td><td>Effectuer une étude de faisabilité technique et économique d'un projet logistique</td><td><input type="number" id="ae5" min="1" max="4" class="saveable radar-in"></td><td><textarea id="at5" class="saveable"></textarea></td></tr>
-                <tr><td>CP6</td><td>Définir et conduire un plan d'actions dans le cadre du déploiement d'une solution logistique</td><td><input type="number" id="ae6" min="1" max="4" class="saveable radar-in"></td><td><textarea id="at6" class="saveable"></textarea></td></tr>
-                <tr><td>CP7</td><td>Rationaliser l'agencement des zones logistiques et l'implantation des produits</td><td><input type="number" id="ae7" min="1" max="4" class="saveable radar-in"></td><td><textarea id="at7" class="saveable"></textarea></td></tr>
-                <tr><td>CP8</td><td>Élaborer des procédures de travail adaptées aux activités logistiques</td><td><input type="number" id="ae8" min="1" max="4" class="saveable radar-in"></td><td><textarea id="at8" class="saveable"></textarea></td></tr>
+                <tr>
+                    <td><strong>CP 1 : Flux & Organisation</strong><br><span class="critere-list">Planification, productivité, social.</span></td>
+                    <td><input type="number" id="ae1" min="1" max="4" class="saveable r-in"></td>
+                    <td>
+                        <textarea id="at1" class="saveable" placeholder="Décrivez votre action..."></textarea>
+                        <div class="help-box">💡 <strong>Aide :</strong> "J'ai planifié l'activité de 12 caristes sur Excel en tenant compte des volumes de réception et des contraintes sociales (temps de pause)."</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>CP 2 : Management RH</strong><br><span class="critere-list">Inclusion, entretiens, régulation.</span></td>
+                    <td><input type="number" id="ae2" min="1" max="4" class="saveable r-in"></td>
+                    <td>
+                        <textarea id="at2" class="saveable"></textarea>
+                        <div class="help-box">💡 <strong>Aide :</strong> "J'ai mené un entretien de recrutement pour un préparateur de commande en situation de handicap en adaptant son poste de travail."</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>CP 3 : Analyse KPI</strong><br><span class="critere-list">Indicateurs, tableaux de bord.</span></td>
+                    <td><input type="number" id="ae3" min="1" max="4" class="saveable r-in"></td>
+                    <td>
+                        <textarea id="at3" class="saveable"></textarea>
+                        <div class="help-box">💡 <strong>Aide :</strong> "J'ai identifié un écart de productivité de 5% par rapport à l'objectif et j'ai proposé de réorganiser la zone de picking pour réduire les déplacements."</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>CP 4 : Dysfonctionnements / EN</strong><br><span class="critere-list">Actions correctives, Anglais B1.</span></td>
+                    <td><input type="number" id="ae4" min="1" max="4" class="saveable r-in"></td>
+                    <td>
+                        <textarea id="at4" class="saveable"></textarea>
+                        <div class="help-box">💡 <strong>Aide :</strong> "J'ai traité une avarie de transport en contactant le fournisseur par mail en anglais pour demander le remplacement des marchandises."</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>CP 5 : Faisabilité / Méthodes</strong><br><span class="critere-list">Coûts, simulations techniques.</span></td>
+                    <td><input type="number" id="ae5" min="1" max="4" class="saveable r-in"></td>
+                    <td>
+                        <textarea id="at5" class="saveable"></textarea>
+                        <div class="help-box">💡 <strong>Aide :</strong> "J'ai réalisé une étude comparative entre deux systèmes de stockage (dynamique vs fixe) en calculant le ROI sur 18 mois."</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>CP 6 : Gestion Projet</strong><br><span class="critere-list">Chemin critique, budget, Gantt.</span></td>
+                    <td><input type="number" id="ae6" min="1" max="4" class="saveable r-in"></td>
+                    <td>
+                        <textarea id="at6" class="saveable"></textarea>
+                        <div class="help-box">💡 <strong>Aide :</strong> "J'ai piloté le déploiement d'un nouveau module WMS en suivant le chemin critique pour éviter un retard lors du démarrage."</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>CP 7 : Agencement / Implantation</strong><br><span class="critere-list">Slotting, paramétrage WMS.</span></td>
+                    <td><input type="number" id="ae7" min="1" max="4" class="saveable r-in"></td>
+                    <td>
+                        <textarea id="at7" class="saveable"></textarea>
+                        <div class="help-box">💡 <strong>Aide :</strong> "J'ai réorganisé l'implantation des références à forte rotation (Classe A) pour gagner 20 minutes par tournée de préparation."</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>CP 8 : Procédures de travail</strong><br><span class="critere-list">SOP, sécurité, standards.</span></td>
+                    <td><input type="number" id="ae8" min="1" max="4" class="saveable r-in"></td>
+                    <td>
+                        <textarea id="at8" class="saveable"></textarea>
+                        <div class="help-box">💡 <strong>Aide :</strong> "J'ai rédigé un nouveau mode opératoire pour la réception de produits dangereux, incluant les consignes de sécurité et le port des EPI."</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="transverse" class="tab-content">
+        <h2>Compétences Transversales (CT) - Libellés Officiels</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:30%">Compétence Transversale</th>
+                    <th style="width:40%">Critères de Performance (REAC)</th>
+                    <th style="width:30%">Observations / Évaluation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>CT 1 : Communiquer avec différents interlocuteurs</strong></td>
+                    <td><ul class="critere-list"><li>L'information est transmise aux bons interlocuteurs</li><li>Postures adaptées aux profils (client, hiérarchie, équipe)</li><li>Communication fluide et professionnelle</li></ul></td>
+                    <td><textarea id="ct1_v" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CT 2 : Mettre en œuvre et faire respecter des règles et des procédures</strong></td>
+                    <td><ul class="critere-list"><li>Hygiène, Sécurité, Sûreté, Qualité respectées</li><li>Règles RSE et Cyber-sécurité (ANSSI/RGPD) appliquées</li><li>Sauvegarde de l'intégrité des flux et données</li></ul></td>
+                    <td><textarea id="ct2_v" class="saveable"></textarea></td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -175,10 +259,10 @@
             data: {
                 labels: ['CP1', 'CP2', 'CP3', 'CP4', 'CP5', 'CP6', 'CP7', 'CP8'],
                 datasets: [{
-                    label: 'Profil de Compétences',
+                    label: 'Profil Apprenant',
                     data: [0,0,0,0,0,0,0,0],
-                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(44, 62, 80, 0.2)',
+                    borderColor: '#2c3e50',
                     pointBackgroundColor: '#2c3e50'
                 }]
             },
@@ -197,11 +281,11 @@
     function save() {
         const data = {};
         fields.forEach(f => data[f.id] = f.value);
-        localStorage.setItem('tsmel_reac_v6', JSON.stringify(data));
+        localStorage.setItem('tsmel_v9_expert', JSON.stringify(data));
         updateRadar();
     }
     function load() {
-        const d = JSON.parse(localStorage.getItem('tsmel_reac_v6'));
+        const d = JSON.parse(localStorage.getItem('tsmel_v9_expert'));
         if(d) fields.forEach(f => { if(d[f.id]) f.value = d[f.id]; });
         updateRadar();
     }
@@ -209,14 +293,15 @@
     fields.forEach(f => f.addEventListener('input', save));
     window.onload = () => { initRadar(); load(); };
 
-    function clearData() { if(confirm("Réinitialiser ?")) { localStorage.removeItem('tsmel_reac_v6'); location.reload(); } }
+    function clearData() { if(confirm("Voulez-vous réinitialiser ?")) { localStorage.removeItem('tsmel_v9_expert'); location.reload(); } }
+    
     function exportCSV() {
-        let csv = "\ufeffChamp;Valeur\n";
-        fields.forEach(f => csv += `${f.id};"${f.value.replace(/"/g, '""')}"\n`);
+        let csv = "\ufeffSection;ID;Valeur\n";
+        fields.forEach(f => csv += `TSMEL_V9;${f.id};"${f.value.replace(/"/g, '""').replace(/(\n|\r)/g, ' ')}"\n`);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "suivi_reac_tsmel.csv";
+        link.download = "suivi_pedagogique_tsmel_expert.csv";
         link.click();
     }
 </script>
