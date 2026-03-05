@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suivi TSMEL - AFPA</title>
+    <title>Suivi TSMEL - 97-Quatre formations</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --info: #3498db; }
@@ -195,12 +195,13 @@
 
     <script>
         let radar;
+
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.getElementById('btn-' + id).classList.add('active');
-            if(id === 't2' && radar) radar.update();
+            if (id === 't2' && radar) radar.update();
         }
 
         function initRadar() {
@@ -227,8 +228,8 @@
 
         function updateRadar() {
             const d = [];
-            for(let i=1; i<=8; i++) {
-                const val = document.getElementById('ae'+i).value;
+            for (let i = 1; i <= 8; i++) {
+                const val = document.getElementById('ae' + i).value;
                 d.push(parseFloat(val) || 0);
             }
             radar.data.datasets[0].data = d;
@@ -237,39 +238,42 @@
 
         const saveables = document.querySelectorAll('.saveable');
 
-        function save() {
+        // ✅ CORRECTION 1 : utilisation de e.target au lieu de this
+        function save(e) {
             const data = {};
             saveables.forEach(f => data[f.id] = f.value);
             localStorage.setItem('tsmel_progression_v3', JSON.stringify(data));
-            if(this.classList && this.classList.contains('radar-input')) updateRadar();
+            if (e.target.classList && e.target.classList.contains('radar-input')) {
+                updateRadar();
+            }
         }
 
         function load() {
             const data = JSON.parse(localStorage.getItem('tsmel_progression_v3'));
-            if(data) {
+            if (data) {
                 saveables.forEach(f => {
-                    if(data[f.id] !== undefined) f.value = data[f.id];
+                    if (data[f.id] !== undefined) f.value = data[f.id];
                 });
             }
-            if(radar) updateRadar();
+            if (radar) updateRadar();
         }
 
         saveables.forEach(f => f.addEventListener('input', save));
         window.onload = () => { initRadar(); load(); };
 
         function clearData() {
-            if(confirm("Effacer tout le suivi ?")) {
+            if (confirm("Effacer tout le suivi ?")) {
                 localStorage.removeItem('tsmel_progression_v3');
                 location.reload();
             }
         }
 
+        // ✅ CORRECTION 2 : \n au lieu de sauts de ligne littéraux
+        // ✅ CORRECTION 3 : "\ufeff" au lieu de "\\ufeff"
         function exportToCSV() {
-            let csv = "ID;Valeur
-";
+            let csv = "ID;Valeur\n";
             saveables.forEach(f => {
-                csv += `${f.id};"${f.value.replace(/"/g, '""')}"
-`;
+                csv += `${f.id};"${f.value.replace(/"/g, '""')}"\n`;
             });
             const b = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
             const a = document.createElement("a");
