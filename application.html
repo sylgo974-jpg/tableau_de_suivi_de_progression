@@ -12,6 +12,12 @@
         header { text-align: center; border-bottom: 3px solid var(--primary); margin-bottom: 25px; padding-bottom: 10px; }
         h1 { font-size: 20px; text-transform: uppercase; margin: 0; color: var(--primary); }
         
+        /* Infos Apprenant */
+        .apprenant-info { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 5px; border-left: 5px solid var(--primary); }
+        .info-field { display: flex; flex-direction: column; gap: 5px; }
+        .info-field label { font-weight: bold; color: var(--primary); font-size: 11px; text-transform: uppercase; }
+        .info-field input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
         .tab-btn { padding: 12px 20px; border: none; background: #eee; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
         .tab-btn.active { background: var(--primary); color: white; }
@@ -19,7 +25,6 @@
         .tab-content.active { display: block; }
 
         h2 { background: var(--primary); color: white; padding: 10px 15px; font-size: 16px; margin-top: 30px; border-radius: 4px; display: flex; justify-content: space-between; }
-        h2.transversal { background: var(--accent); }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
         th, td { border: 1px solid #bdc3c7; padding: 10px; vertical-align: top; }
         th { background: #f8f9fa; font-size: 11px; text-transform: uppercase; color: var(--primary); }
@@ -54,6 +59,17 @@
         <p><em>Référentiel REAC v10 - AFPA Réunion</em></p>
     </header>
 
+    <div class="apprenant-info">
+        <div class="info-field">
+            <label for="nom_apprenant">Nom de l'Apprenant</label>
+            <input type="text" id="nom_apprenant" class="saveable" placeholder="Nom">
+        </div>
+        <div class="info-field">
+            <label for="prenom_apprenant">Prénom de l'Apprenant</label>
+            <input type="text" id="prenom_apprenant" class="saveable" placeholder="Prénom">
+        </div>
+    </div>
+
     <div class="controls no-print">
         <button class="btn btn-clear" onclick="clearData()">Réinitialiser</button>
         <button class="btn btn-export" onclick="exportToCSV()">Exporter Excel (CSV)</button>
@@ -61,8 +77,8 @@
     </div>
 
     <div class="nav-tabs no-print">
-        <button class="tab-btn active" onclick="showTab('tab1')">1. Évaluation Formateur</button>
-        <button class="tab-btn" onclick="showTab('tab2')">2. Auto-évaluation & Progression</button>
+        <button class="tab-btn active" id="btn-tab1" onclick="showTab('tab1')">1. Évaluation Formateur</button>
+        <button class="tab-btn" id="btn-tab2" onclick="showTab('tab2')">2. Auto-évaluation & Progression</button>
     </div>
 
     <!-- TAB 1 : EVALUATION FORMATEUR -->
@@ -175,9 +191,17 @@
 <script>
     let radar;
     function showTab(id) {
-        document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
+        // Cacher tous les contenus
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        // Désactiver tous les boutons
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        // Activer le contenu cible
         document.getElementById(id).classList.add('active');
-        event.currentTarget.classList.add('active');
+        // Activer le bouton correspondant
+        document.getElementById('btn-' + id).classList.add('active');
+        
+        if(id === 'tab2' && radar) radar.update();
     }
 
     function initRadar() {
@@ -202,22 +226,24 @@
         const d = [];
         for(let i=1; i<=8; i++) {
             const val = document.getElementById('ae'+i);
-            d.push(val ? (val.value || 0) : 0);
+            d.push(val ? (parseFloat(val.value) || 0) : 0);
         }
-        radar.data.datasets[0].data = d;
-        radar.update();
+        if(radar) {
+            radar.data.datasets[0].data = d;
+            radar.update();
+        }
     }
 
     const saveables = document.querySelectorAll('.saveable');
     function save() {
         const data = {};
         saveables.forEach(f => data[f.id] = f.value);
-        localStorage.setItem('tsmel_progression_data', JSON.stringify(data));
-        if(event && event.target.classList.contains('radar-input')) updateRadar();
+        localStorage.setItem('tsmel_v2_data', JSON.stringify(data));
+        if(this && this.classList && this.classList.contains('radar-input')) updateRadar();
     }
 
     function load() {
-        const data = JSON.parse(localStorage.getItem('tsmel_progression_data'));
+        const data = JSON.parse(localStorage.getItem('tsmel_v2_data'));
         if(data) saveables.forEach(f => {
             if(data[f.id] !== undefined) f.value = data[f.id];
         });
@@ -229,7 +255,7 @@
 
     function clearData() {
         if(confirm("Effacer tout le suivi ?")) {
-            localStorage.removeItem('tsmel_progression_data');
+            localStorage.removeItem('tsmel_v2_data');
             location.reload();
         }
     }
