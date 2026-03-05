@@ -3,276 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suivi TSMEL - Expert Pédagogique</title>
+    <title>Suivi TSMEL</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --info: #3498db; --accent: #8e44ad; --warning: #f39c12; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #333; margin: 0; padding: 20px; background: #f0f2f5; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        header { text-align: center; border-bottom: 3px solid var(--primary); margin-bottom: 25px; padding-bottom: 10px; }
-        h1 { font-size: 20px; text-transform: uppercase; margin: 0; color: var(--primary); }
-        
-        /* Infos Apprenant */
-        .apprenant-info { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 5px; border-left: 5px solid var(--primary); }
-        .info-field { display: flex; flex-direction: column; gap: 5px; }
-        .info-field label { font-weight: bold; color: var(--primary); font-size: 11px; text-transform: uppercase; }
-        .info-field input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
-
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
-        .tab-btn { padding: 12px 20px; border: none; background: #eee; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
-        .tab-btn.active { background: var(--primary); color: white; }
+        :root { --p: #2c3e50; --s: #27ae60; --d: #e74c3c; --i: #3498db; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; }
+        .app-info { display: flex; gap: 10px; margin-bottom: 20px; padding: 10px; background: #eee; }
+        .nav { display: flex; gap: 5px; margin-bottom: 20px; }
+        .tab-btn { padding: 10px; cursor: pointer; border: none; background: #ddd; }
+        .tab-btn.active { background: var(--p); color: white; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
-        h2 { background: var(--primary); color: white; padding: 10px 15px; font-size: 16px; margin-top: 30px; border-radius: 4px; display: flex; justify-content: space-between; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
-        th, td { border: 1px solid #bdc3c7; padding: 10px; vertical-align: top; }
-        th { background: #f8f9fa; font-size: 11px; text-transform: uppercase; color: var(--primary); }
-        
-        .saveable { width: 100%; border: 1px solid #dfe6e9; padding: 6px; box-sizing: border-box; border-radius: 3px; }
-        textarea.saveable { height: 60px; resize: vertical; }
-        input[type="number"].saveable { text-align: center; font-weight: bold; }
-        
-        .critere-list { font-size: 11px; color: #555; margin: 5px 0 0 15px; padding: 0; list-style-type: square; }
-        .chart-container { width: 500px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
-        .controls { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 20px; }
-        .btn { padding: 10px 18px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; color: white; transition: opacity 0.2s; }
-        .btn-print { background: var(--success); }
-        .btn-export { background: var(--info); }
-        .btn-clear { background: var(--danger); }
-
-        @media print {
-            .no-print, .nav-tabs { display: none !important; }
-            .tab-content { display: block !important; page-break-after: always; }
-            body { background: white; padding: 0; }
-            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
-            textarea, input, select { border: none !important; appearance: none; background: transparent; }
-            h2 { border: 1px solid #000; color: black !important; background: #eee !important; }
-        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        .saveable { width: 100%; }
+        .chart { width: 400px; margin: auto; }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <header>
-        <h1>Tableau de Suivi de Progression TSMEL</h1>
-        <p><em>Référentiel REAC v10 - AFPA Réunion</em></p>
-    </header>
-
-    <div class="apprenant-info">
-        <div class="info-field">
-            <label for="nom_apprenant">Nom de l'Apprenant</label>
-            <input type="text" id="nom_apprenant" class="saveable" placeholder="Nom">
-        </div>
-        <div class="info-field">
-            <label for="prenom_apprenant">Prénom de l'Apprenant</label>
-            <input type="text" id="prenom_apprenant" class="saveable" placeholder="Prénom">
-        </div>
+    <h1>Suivi TSMEL</h1>
+    <div class="app-info">
+        <input type="text" id="nom" class="saveable" placeholder="Nom">
+        <input type="text" id="prenom" class="saveable" placeholder="Prénom">
     </div>
-
-    <div class="controls no-print">
-        <button class="btn btn-clear" onclick="clearData()">Réinitialiser</button>
-        <button class="btn btn-export" onclick="exportToCSV()">Exporter Excel (CSV)</button>
-        <button class="btn btn-print" onclick="window.print()">Imprimer PDF</button>
+    <div class="nav">
+        <button class="tab-btn active" id="b1" onclick="go('t1')">1. Formateur</button>
+        <button class="tab-btn" id="b2" onclick="go('t2')">2. Auto-évaluation</button>
     </div>
-
-    <div class="nav-tabs no-print">
-        <button class="tab-btn active" id="btn-tab1" onclick="showTab('tab1')">1. Évaluation Formateur</button>
-        <button class="tab-btn" id="btn-tab2" onclick="showTab('tab2')">2. Auto-évaluation & Progression</button>
-    </div>
-
-    <!-- TAB 1 : EVALUATION FORMATEUR -->
-    <div id="tab1" class="tab-content active">
-        <h2>AT 1 : Piloter les activités du site logistique</h2>
+    <div id="t1" class="tab-content active">
         <table>
-            <thead>
-                <tr>
-                    <th width="40%">Compétence Professionnelle & Objectifs</th>
-                    <th width="35%">Critères de Performance (Attendus)</th>
-                    <th width="10%">Statut</th>
-                    <th width="15%">Observations</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>CP 1 :</strong> Organiser et réguler les activités logistiques</td>
-                    <td><ul class="critere-list"><li>Réglementation sociale respectée</li><li>Niveaux de productivité atteints</li><li>Cahiers des charges respectés</li></ul></td>
-                    <td><select id="cp1_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                    <td><textarea id="cp1_o" class="saveable"></textarea></td>
-                </tr>
-                <tr>
-                    <td><strong>CP 2 :</strong> Manager les équipes opérationnelles</td>
-                    <td><ul class="critere-list"><li>Orientations stratégiques communiquées</li><li>Politique RH respectée</li><li>Besoins de formation définis</li></ul></td>
-                    <td><select id="cp2_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                    <td><textarea id="cp2_o" class="saveable"></textarea></td>
-                </tr>
-                <tr>
-                    <td><strong>CP 3 :</strong> Déterminer et exploiter les indicateurs</td>
-                    <td><ul class="critere-list"><li>Pertinence des indicateurs (KPI)</li><li>Écarts et causes identifiés</li><li>Solutions d'amélioration déterminées</li></ul></td>
-                    <td><select id="cp3_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                    <td><textarea id="cp3_o" class="saveable"></textarea></td>
-                </tr>
-                <tr>
-                    <td><strong>CP 4 :</strong> Repérer et traiter les dysfonctionnements (incl. Anglais)</td>
-                    <td><ul class="critere-list"><li>Causes identifiées précisément</li><li>Actions correctives pertinentes</li><li>Communication fluide (Anglais B1)</li></ul></td>
-                    <td><select id="cp4_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                    <td><textarea id="cp4_o" class="saveable"></textarea></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <h2>AT 2 : Solutions techniques et Méthodes</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th width="40%">Compétence Professionnelle & Objectifs</th>
-                    <th width="35%">Critères de Performance (Attendus)</th>
-                    <th width="10%">Statut</th>
-                    <th width="15%">Observations</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>CP 5 :</strong> Étude de faisabilité technique et économique</td>
-                    <td><ul class="critere-list"><li>Analyse exhaustive des besoins</li><li>Optimisation coût/qualité</li><li>Impact conditions de travail intégré</li></ul></td>
-                    <td><select id="cp5_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                    <td><textarea id="cp5_o" class="saveable"></textarea></td>
-                </tr>
-                <tr>
-                    <td><strong>CP 6 :</strong> Définir et conduire un plan d'actions</td>
-                    <td><ul class="critere-list"><li>Actions, durées et moyens identifiés</li><li>Maîtrise du chemin critique</li><li>Respect du budget alloué</li></ul></td>
-                    <td><select id="cp6_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                    <td><textarea id="cp6_o" class="saveable"></textarea></td>
-                </tr>
-                <tr>
-                    <td><strong>CP 7 :</strong> Rationaliser agencement et implantation</td>
-                    <td><ul class="critere-list"><li>Flux optimisés / Productivité</li><li>Conservation produits respectée</li><li>Règles sécurité/sûreté appliquées</li></ul></td>
-                    <td><select id="cp7_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                    <td><textarea id="cp7_o" class="saveable"></textarea></td>
-                </tr>
-                <tr>
-                    <td><strong>CP 8 :</strong> Élaborer des procédures de travail</td>
-                    <td><ul class="critere-list"><li>Procédures conformes au réel</li><li>Compréhension vérifiée des équipes</li><li>Respect des normes QSE</li></ul></td>
-                    <td><select id="cp8_s" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                    <td><textarea id="cp8_o" class="saveable"></textarea></td>
-                </tr>
-            </tbody>
+            <tr><th>CP</th><th>Statut</th><th>Notes</th></tr>
+            <tr><td>CP1</td><td><select id="s1" class="saveable"><option>À débuter</option><option>Acquis</option></select></td><td><textarea id="o1" class="saveable"></textarea></td></tr>
+            <tr><td>CP2</td><td><select id="s2" class="saveable"><option>À débuter</option><option>Acquis</option></select></td><td><textarea id="o2" class="saveable"></textarea></td></tr>
+            <tr><td>CP3</td><td><select id="s3" class="saveable"><option>À débuter</option><option>Acquis</option></select></td><td><textarea id="o3" class="saveable"></textarea></td></tr>
+            <tr><td>CP4</td><td><select id="s4" class="saveable"><option>À débuter</option><option>Acquis</option></select></td><td><textarea id="o4" class="saveable"></textarea></td></tr>
+            <tr><td>CP5</td><td><select id="s5" class="saveable"><option>À débuter</option><option>Acquis</option></select></td><td><textarea id="o5" class="saveable"></textarea></td></tr>
+            <tr><td>CP6</td><td><select id="s6" class="saveable"><option>À débuter</option><option>Acquis</option></select></td><td><textarea id="o6" class="saveable"></textarea></td></tr>
+            <tr><td>CP7</td><td><select id="s7" class="saveable"><option>À débuter</option><option>Acquis</option></select></td><td><textarea id="o7" class="saveable"></textarea></td></tr>
+            <tr><td>CP8</td><td><select id="s8" class="saveable"><option>À débuter</option><option>Acquis</option></select></td><td><textarea id="o8" class="saveable"></textarea></td></tr>
         </table>
     </div>
-
-    <!-- TAB 2 : AUTO-EVALUATION -->
-    <div id="tab2" class="tab-content">
-        <h2>Ma Progression (Auto-évaluation)</h2>
-        <div class="chart-container no-print">
-            <canvas id="radarChart"></canvas>
-        </div>
+    <div id="t2" class="tab-content">
+        <div class="chart"><canvas id="radar"></canvas></div>
         <table>
-            <thead>
-                <tr>
-                    <th width="50%">Compétence & Objectifs de Maîtrise</th>
-                    <th width="10%">Note (1-4)</th>
-                    <th width="40%">Auto-analyse : Ce que j'ai réalisé / Preuves</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td><strong>CP 1 : Organisation & Flux</strong></td><td><input type="number" id="ae1" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen1" class="saveable"></textarea></td></tr>
-                <tr><td><strong>CP 2 : Management d'Équipe</strong></td><td><input type="number" id="ae2" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen2" class="saveable"></textarea></td></tr>
-                <tr><td><strong>CP 3 : Pilotage par Indicateurs</strong></td><td><input type="number" id="ae3" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen3" class="saveable"></textarea></td></tr>
-                <tr><td><strong>CP 4 : Qualité & Anglais Pro</strong></td><td><input type="number" id="ae4" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen4" class="saveable"></textarea></td></tr>
-                <tr><td><strong>CP 5 : Étude de Faisabilité</strong></td><td><input type="number" id="ae5" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen5" class="saveable"></textarea></td></tr>
-                <tr><td><strong>CP 6 : Gestion de Projet</strong></td><td><input type="number" id="ae6" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen6" class="saveable"></textarea></td></tr>
-                <tr><td><strong>CP 7 : Agencement & WMS</strong></td><td><input type="number" id="ae7" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen7" class="saveable"></textarea></td></tr>
-                <tr><td><strong>CP 8 : Standardisation & QSE</strong></td><td><input type="number" id="ae8" min="1" max="4" class="saveable radar-input"></td><td><textarea id="aen8" class="saveable"></textarea></td></tr>
-            </tbody>
+            <tr><th>CP</th><th>Note (1-4)</th><th>Preuves</th></tr>
+            <tr><td>CP1</td><td><input type="number" id="ae1" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n1" class="saveable"></textarea></td></tr>
+            <tr><td>CP2</td><td><input type="number" id="ae2" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n2" class="saveable"></textarea></td></tr>
+            <tr><td>CP3</td><td><input type="number" id="ae3" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n3" class="saveable"></textarea></td></tr>
+            <tr><td>CP4</td><td><input type="number" id="ae4" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n4" class="saveable"></textarea></td></tr>
+            <tr><td>CP5</td><td><input type="number" id="ae5" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n5" class="saveable"></textarea></td></tr>
+            <tr><td>CP6</td><td><input type="number" id="ae6" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n6" class="saveable"></textarea></td></tr>
+            <tr><td>CP7</td><td><input type="number" id="ae7" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n7" class="saveable"></textarea></td></tr>
+            <tr><td>CP8</td><td><input type="number" id="ae8" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n8" class="saveable"></textarea></td></tr>
         </table>
     </div>
 </div>
-
 <script>
     let radar;
-    function showTab(id) {
-        // Cacher tous les contenus
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        // Désactiver tous les boutons
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        
-        // Activer le contenu cible
+    function go(id) {
+        document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        // Activer le bouton correspondant
-        document.getElementById('btn-' + id).classList.add('active');
-        
-        if(id === 'tab2' && radar) radar.update();
+        document.getElementById('b' + id.slice(1)).classList.add('active');
+        if(id === 't2' && radar) radar.update();
     }
-
-    function initRadar() {
-        const ctx = document.getElementById('radarChart').getContext('2d');
-        radar = new Chart(ctx, {
+    function init() {
+        radar = new Chart(document.getElementById('radar'), {
             type: 'radar',
             data: {
-                labels: ['CP1', 'CP2', 'CP3', 'CP4', 'CP5', 'CP6', 'CP7', 'CP8'],
-                datasets: [{
-                    label: 'Profil de Compétences',
-                    data: [0,0,0,0,0,0,0,0],
-                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                    borderColor: '#2980b9',
-                    pointBackgroundColor: '#2c3e50'
-                }]
+                labels: ['CP1','CP2','CP3','CP4','CP5','CP6','CP7','CP8'],
+                datasets: [{ label: 'Profil', data: [0,0,0,0,0,0,0,0], backgroundColor: 'rgba(52,152,219,0.2)', borderColor: '#2980b9' }]
             },
-            options: { scales: { r: { min: 0, max: 4, ticks: { stepSize: 1 } } } }
+            options: { scales: { r: { min: 0, max: 4 } } }
         });
     }
-
-    function updateRadar() {
+    function up() {
         const d = [];
-        for(let i=1; i<=8; i++) {
-            const val = document.getElementById('ae'+i);
-            d.push(val ? (parseFloat(val.value) || 0) : 0);
-        }
-        if(radar) {
-            radar.data.datasets[0].data = d;
-            radar.update();
-        }
+        for(let i=1; i<=8; i++) d.push(parseFloat(document.getElementById('ae'+i).value) || 0);
+        radar.data.datasets[0].data = d;
+        radar.update();
     }
-
-    const saveables = document.querySelectorAll('.saveable');
+    const els = document.querySelectorAll('.saveable');
     function save() {
-        const data = {};
-        saveables.forEach(f => data[f.id] = f.value);
-        localStorage.setItem('tsmel_v2_data', JSON.stringify(data));
-        if(this && this.classList && this.classList.contains('radar-input')) updateRadar();
+        const d = {};
+        els.forEach(e => d[e.id] = e.value);
+        localStorage.setItem('tsmel_data', JSON.stringify(d));
+        if(this.classList.contains('radar-input')) up();
     }
-
     function load() {
-        const data = JSON.parse(localStorage.getItem('tsmel_v2_data'));
-        if(data) saveables.forEach(f => {
-            if(data[f.id] !== undefined) f.value = data[f.id];
-        });
-        updateRadar();
+        const d = JSON.parse(localStorage.getItem('tsmel_data'));
+        if(d) els.forEach(e => { if(d[e.id]!==undefined) e.value = d[e.id]; });
+        up();
     }
-
-    saveables.forEach(f => f.addEventListener('input', save));
-    window.onload = () => { initRadar(); load(); };
-
-    function clearData() {
-        if(confirm("Effacer tout le suivi ?")) {
-            localStorage.removeItem('tsmel_v2_data');
-            location.reload();
-        }
-    }
-
-    function exportToCSV() {
-        let csv = "ID;Valeur
-";
-        saveables.forEach(f => {
-            csv += `${f.id};"${f.value.replace(/"/g, '""')}"
-`;
-        });
-        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "suivi_tsmel.csv";
-        link.click();
-    }
+    els.forEach(e => e.addEventListener('input', save));
+    window.onload = () => { init(); load(); };
 </script>
 </body>
 </html>
