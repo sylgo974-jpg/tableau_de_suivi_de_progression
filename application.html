@@ -6,16 +6,17 @@
     <title>Suivi TSMEL - 97-Quatre formations</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --info: #3498db; }
+        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --info: #3498db; --warning: #f39c12; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 20px; font-size: 14px; }
         .container { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         header { text-align: center; border-bottom: 3px solid var(--primary); margin-bottom: 25px; padding-bottom: 10px; }
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; flex-wrap: wrap; }
         .tab-btn { padding: 12px 20px; border: none; background: #eee; cursor: pointer; border-radius: 5px 5px 0 0; font-weight: bold; transition: 0.3s; }
         .tab-btn.active { background: var(--primary); color: white; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         h2 { background: var(--primary); color: white; padding: 10px; border-radius: 4px; margin-top: 20px; font-size: 18px; }
+        h3 { background: #34495e; color: white; padding: 8px 12px; border-radius: 4px; margin-top: 15px; font-size: 15px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #bdc3c7; padding: 10px; vertical-align: top; }
         th { background: #f8f9fa; font-size: 12px; text-transform: uppercase; color: var(--primary); }
@@ -26,6 +27,32 @@
         .controls { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 20px; }
         .btn { padding: 10px 18px; border: none; cursor: pointer; border-radius: 5px; color: white; font-weight: bold; transition: 0.2s; }
         .btn:hover { opacity: 0.8; }
+
+        /* Styles EPCF */
+        .epcf-bloc { border: 2px solid var(--primary); border-radius: 8px; margin-bottom: 30px; overflow: hidden; }
+        .epcf-header { background: var(--primary); color: white; padding: 12px 18px; }
+        .epcf-header h3 { background: none; color: white; margin: 0; padding: 0; font-size: 16px; }
+        .epcf-header p { margin: 4px 0 0; font-size: 12px; opacity: 0.85; }
+        .epcf-body { padding: 15px; }
+        .epcf-section { background: #f8f9fa; border-left: 4px solid var(--info); padding: 10px 14px; margin-bottom: 12px; border-radius: 0 4px 4px 0; }
+        .epcf-section h4 { margin: 0 0 6px; font-size: 13px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .epcf-section ul { margin: 4px 0 0 18px; padding: 0; font-size: 12px; color: #444; }
+        .epcf-section ul li { margin-bottom: 3px; }
+        .critere-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #ecf0f1; }
+        .critere-row:last-child { border-bottom: none; }
+        .critere-row label { flex: 1; font-size: 12px; color: #333; }
+        .critere-row select { width: 130px; border: 1px solid #ddd; padding: 4px 6px; border-radius: 3px; font-size: 12px; background: white; }
+        .critere-row select.ok { border-color: var(--success); background: #eafaf1; }
+        .critere-row select.ko { border-color: var(--danger); background: #fdf3f3; }
+        .critere-row select.ec { border-color: var(--warning); background: #fef9e7; }
+        .epcf-obs { margin-top: 10px; }
+        .epcf-obs label { font-size: 12px; font-weight: bold; color: var(--primary); display: block; margin-bottom: 4px; }
+        .score-bar { background: #ecf0f1; border-radius: 10px; height: 12px; margin-top: 10px; overflow: hidden; }
+        .score-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--danger), var(--warning), var(--success)); transition: width 0.4s; }
+        .score-label { font-size: 11px; color: #666; margin-top: 4px; text-align: right; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; color: white; margin-left: 10px; }
+        .badge-at { background: var(--info); }
+
         @media print {
             .no-print { display: none !important; }
             .tab-content { display: block !important; page-break-after: always; }
@@ -36,251 +63,434 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Tableau de Suivi de Progression TSMEL</h1>
-            <p><em>Référentiel REAC v10 - AFPA Réunion</em></p>
-        </header>
+<div class="container">
+    <header>
+        <h1>Tableau de Suivi de Progression TSMEL</h1>
+        <p><em>Référentiel REAC v10 — 97-Quatre Formations | Réunion</em></p>
+    </header>
 
-        <div class="controls no-print">
-            <button class="btn" style="background:var(--danger)" onclick="clearData()">Réinitialiser</button>
-            <button class="btn" style="background:var(--info)" onclick="exportToCSV()">Exporter CSV</button>
-            <button class="btn" style="background:var(--success)" onclick="window.print()">Imprimer PDF</button>
-        </div>
+    <div class="controls no-print">
+        <button class="btn" style="background:var(--danger)" onclick="clearData()">Réinitialiser</button>
+        <button class="btn" style="background:var(--info)" onclick="exportToCSV()">Exporter CSV</button>
+        <button class="btn" style="background:var(--success)" onclick="window.print()">Imprimer PDF</button>
+    </div>
 
-        <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 5px solid var(--primary);">
-            <label><strong>NOM & PRÉNOM DE L'APPRENANT :</strong></label>
-            <input type="text" id="apprenant_nom" class="saveable" placeholder="Saisir ici..." style="width: 350px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-        </div>
+    <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 5px solid var(--primary);">
+        <label><strong>NOM & PRÉNOM DE L'APPRENANT :</strong></label>
+        <input type="text" id="apprenant_nom" class="saveable" placeholder="Saisir ici..." style="width: 350px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+    </div>
 
-        <div class="nav-tabs no-print">
-            <button class="tab-btn active" id="btn-t1" onclick="showTab('t1')">1. Évaluation Formateur</button>
-            <button class="tab-btn" id="btn-t2" onclick="showTab('t2')">2. Auto-évaluation & Progression</button>
-        </div>
+    <div class="nav-tabs no-print">
+        <button class="tab-btn active" id="btn-t1" onclick="showTab('t1')">1. Évaluation Formateur</button>
+        <button class="tab-btn" id="btn-t2" onclick="showTab('t2')">2. Auto-évaluation & Progression</button>
+        <button class="tab-btn" id="btn-t3" onclick="showTab('t3')">3. Suivi EPCF (AT1)</button>
+    </div>
 
-        <!-- TAB 1 : EVALUATION FORMATEUR -->
-        <div id="t1" class="tab-content active">
-            <h2>Période 1 : Piloter les activités du site logistique (AT1 & AT2)</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th width="35%">Compétence Professionnelle</th>
-                        <th width="35%">Objectifs & Attendus (REAC v10)</th>
-                        <th width="12%">Statut</th>
-                        <th width="18%">Observations Formateur</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>CP 1 :</strong> Organiser et réguler les activités logistiques</td>
-                        <td><ul class="critere-list"><li>Réglementation sociale respectée</li><li>Niveaux de productivité atteints</li><li>Cahiers des charges respectés</li></ul></td>
-                        <td><select id="s1" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                        <td><textarea id="o1" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 2 :</strong> Manager les équipes opérationnelles</td>
-                        <td><ul class="critere-list"><li>Orientations stratégiques communiquées</li><li>Politique RH respectée</li><li>Besoins de formation définis</li></ul></td>
-                        <td><select id="s2" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                        <td><textarea id="o2" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 3 :</strong> Déterminer et exploiter les indicateurs</td>
-                        <td><ul class="critere-list"><li>Pertinence des indicateurs (KPI)</li><li>Écarts et causes identifiés</li><li>Solutions d'amélioration déterminées</li></ul></td>
-                        <td><select id="s3" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                        <td><textarea id="o3" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 4 :</strong> Repérer et traiter les dysfonctionnements</td>
-                        <td><ul class="critere-list"><li>Causes identifiées précisément</li><li>Actions correctives pertinentes</li><li>Communication fluide (Anglais Pro)</li></ul></td>
-                        <td><select id="s4" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                        <td><textarea id="o4" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 5 :</strong> Étude de faisabilité technique et économique</td>
-                        <td><ul class="critere-list"><li>Analyse exhaustive des besoins</li><li>Optimisation coût/qualité</li><li>Impact conditions de travail intégré</li></ul></td>
-                        <td><select id="s5" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                        <td><textarea id="o5" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 6 :</strong> Définir et conduire un plan d'actions</td>
-                        <td><ul class="critere-list"><li>Actions, durées et moyens identifiés</li><li>Maîtrise du chemin critique</li><li>Respect du budget alloué</li></ul></td>
-                        <td><select id="s6" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                        <td><textarea id="o6" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 7 :</strong> Rationaliser agencement et implantation</td>
-                        <td><ul class="critere-list"><li>Flux optimisés / Productivité</li><li>Conservation produits respectée</li><li>Règles sécurité/sûreté appliquées</li></ul></td>
-                        <td><select id="s7" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                        <td><textarea id="o7" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 8 :</strong> Élaborer des procédures de travail</td>
-                        <td><ul class="critere-list"><li>Procédures conformes au réel</li><li>Compréhension vérifiée des équipes</li><li>Respect des normes QSE</li></ul></td>
-                        <td><select id="s8" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
-                        <td><textarea id="o8" class="saveable"></textarea></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <!-- TAB 1 : EVALUATION FORMATEUR -->
+    <div id="t1" class="tab-content active">
+        <h2>Période 1 : Piloter les activités du site logistique (AT1 & AT2)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th width="35%">Compétence Professionnelle</th>
+                    <th width="35%">Objectifs & Attendus (REAC v10)</th>
+                    <th width="12%">Statut</th>
+                    <th width="18%">Observations Formateur</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>CP 1 :</strong> Organiser et réguler les activités logistiques</td>
+                    <td><ul class="critere-list"><li>Réglementation sociale respectée</li><li>Niveaux de productivité atteints</li><li>Cahiers des charges respectés</li></ul></td>
+                    <td><select id="s1" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="o1" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 2 :</strong> Manager les équipes opérationnelles</td>
+                    <td><ul class="critere-list"><li>Orientations stratégiques communiquées</li><li>Politique RH respectée</li><li>Besoins de formation définis</li></ul></td>
+                    <td><select id="s2" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="o2" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 3 :</strong> Déterminer et exploiter les indicateurs</td>
+                    <td><ul class="critere-list"><li>Pertinence des indicateurs (KPI)</li><li>Écarts et causes identifiés</li><li>Solutions d'amélioration déterminées</li></ul></td>
+                    <td><select id="s3" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="o3" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 4 :</strong> Repérer et traiter les dysfonctionnements</td>
+                    <td><ul class="critere-list"><li>Causes identifiées précisément</li><li>Actions correctives pertinentes</li><li>Communication fluide (Anglais Pro)</li></ul></td>
+                    <td><select id="s4" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="o4" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 5 :</strong> Étude de faisabilité technique et économique</td>
+                    <td><ul class="critere-list"><li>Analyse exhaustive des besoins</li><li>Optimisation coût/qualité</li><li>Impact conditions de travail intégré</li></ul></td>
+                    <td><select id="s5" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="o5" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 6 :</strong> Définir et conduire un plan d'actions</td>
+                    <td><ul class="critere-list"><li>Actions, durées et moyens identifiés</li><li>Maîtrise du chemin critique</li><li>Respect du budget alloué</li></ul></td>
+                    <td><select id="s6" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="o6" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 7 :</strong> Rationaliser agencement et implantation</td>
+                    <td><ul class="critere-list"><li>Flux optimisés / Productivité</li><li>Conservation produits respectée</li><li>Règles sécurité/sûreté appliquées</li></ul></td>
+                    <td><select id="s7" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="o7" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 8 :</strong> Élaborer des procédures de travail</td>
+                    <td><ul class="critere-list"><li>Procédures conformes au réel</li><li>Compréhension vérifiée des équipes</li><li>Respect des normes QSE</li></ul></td>
+                    <td><select id="s8" class="saveable"><option>À débuter</option><option>En cours</option><option>Acquis</option></select></td>
+                    <td><textarea id="o8" class="saveable"></textarea></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-        <!-- TAB 2 : AUTO-EVALUATION -->
-        <div id="t2" class="tab-content">
-            <h2>Ma Progression (Auto-évaluation C1-C8)</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th width="30%">Compétence</th>
-                        <th width="40%">Objectifs & Attendus (REAC v10)</th>
-                        <th width="10%">Note (1-4)</th>
-                        <th width="20%">Auto-analyse & Preuves</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>CP 1 :</strong> Organisation & Flux</td>
-                        <td><ul class="critere-list"><li>Réglementation sociale</li><li>Productivité</li><li>Cahier des charges</li></ul></td>
-                        <td><input type="number" id="ae1" min="1" max="4" class="saveable radar-input"></td>
-                        <td><textarea id="aex1" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 2 :</strong> Management d'Équipe</td>
-                        <td><ul class="critere-list"><li>Orientations stratégiques</li><li>Politique RH</li><li>Besoins formation</li></ul></td>
-                        <td><input type="number" id="ae2" min="1" max="4" class="saveable radar-input"></td>
-                        <td><textarea id="aex2" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 3 :</strong> Pilotage par Indicateurs</td>
-                        <td><ul class="critere-list"><li>KPI pertinents</li><li>Analyse écarts</li><li>Améliorations</li></ul></td>
-                        <td><input type="number" id="ae3" min="1" max="4" class="saveable radar-input"></td>
-                        <td><textarea id="aex3" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 4 :</strong> Qualité & Anglais Pro</td>
-                        <td><ul class="critere-list"><li>Dysfonctionnements</li><li>Actions correctives</li><li>Anglais Pro</li></ul></td>
-                        <td><input type="number" id="ae4" min="1" max="4" class="saveable radar-input"></td>
-                        <td><textarea id="aex4" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 5 :</strong> Étude de Faisabilité</td>
-                        <td><ul class="critere-list"><li>Analyse besoins</li><li>Optimisation coût/qualité</li><li>Conditions travail</li></ul></td>
-                        <td><input type="number" id="ae5" min="1" max="4" class="saveable radar-input"></td>
-                        <td><textarea id="aex5" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 6 :</strong> Gestion de Projet</td>
-                        <td><ul class="critere-list"><li>Planning/Actions</li><li>Chemin critique</li><li>Budget</li></ul></td>
-                        <td><input type="number" id="ae6" min="1" max="4" class="saveable radar-input"></td>
-                        <td><textarea id="aex6" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 7 :</strong> Agencement & WMS</td>
-                        <td><ul class="critere-list"><li>Optimisation flux</li><li>Sécurité/Sûreté</li><li>Implantation</li></ul></td>
-                        <td><input type="number" id="ae7" min="1" max="4" class="saveable radar-input"></td>
-                        <td><textarea id="aex7" class="saveable"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td><strong>CP 8 :</strong> Standardisation & QSE</td>
-                        <td><ul class="critere-list"><li>Procédures</li><li>Normes QSE</li><li>Compréhension équipe</li></ul></td>
-                        <td><input type="number" id="ae8" min="1" max="4" class="saveable radar-input"></td>
-                        <td><textarea id="aex8" class="saveable"></textarea></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="chart-container">
-                <canvas id="radar"></canvas>
-            </div>
+    <!-- TAB 2 : AUTO-EVALUATION -->
+    <div id="t2" class="tab-content">
+        <h2>Ma Progression (Auto-évaluation CP1-CP8)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th width="30%">Compétence</th>
+                    <th width="40%">Objectifs & Attendus (REAC v10)</th>
+                    <th width="10%">Note (1-4)</th>
+                    <th width="20%">Auto-analyse & Preuves</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>CP 1 :</strong> Organisation & Flux</td>
+                    <td><ul class="critere-list"><li>Réglementation sociale</li><li>Productivité</li><li>Cahier des charges</li></ul></td>
+                    <td><input type="number" id="ae1" min="1" max="4" class="saveable radar-input"></td>
+                    <td><textarea id="aex1" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 2 :</strong> Management d'Équipe</td>
+                    <td><ul class="critere-list"><li>Orientations stratégiques</li><li>Politique RH</li><li>Besoins formation</li></ul></td>
+                    <td><input type="number" id="ae2" min="1" max="4" class="saveable radar-input"></td>
+                    <td><textarea id="aex2" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 3 :</strong> Pilotage par Indicateurs</td>
+                    <td><ul class="critere-list"><li>KPI pertinents</li><li>Analyse écarts</li><li>Améliorations</li></ul></td>
+                    <td><input type="number" id="ae3" min="1" max="4" class="saveable radar-input"></td>
+                    <td><textarea id="aex3" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 4 :</strong> Qualité & Anglais Pro</td>
+                    <td><ul class="critere-list"><li>Dysfonctionnements</li><li>Actions correctives</li><li>Anglais Pro</li></ul></td>
+                    <td><input type="number" id="ae4" min="1" max="4" class="saveable radar-input"></td>
+                    <td><textarea id="aex4" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 5 :</strong> Étude de Faisabilité</td>
+                    <td><ul class="critere-list"><li>Analyse besoins</li><li>Optimisation coût/qualité</li><li>Conditions travail</li></ul></td>
+                    <td><input type="number" id="ae5" min="1" max="4" class="saveable radar-input"></td>
+                    <td><textarea id="aex5" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 6 :</strong> Gestion de Projet</td>
+                    <td><ul class="critere-list"><li>Planning/Actions</li><li>Chemin critique</li><li>Budget</li></ul></td>
+                    <td><input type="number" id="ae6" min="1" max="4" class="saveable radar-input"></td>
+                    <td><textarea id="aex6" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 7 :</strong> Agencement & WMS</td>
+                    <td><ul class="critere-list"><li>Optimisation flux</li><li>Sécurité/Sûreté</li><li>Implantation</li></ul></td>
+                    <td><input type="number" id="ae7" min="1" max="4" class="saveable radar-input"></td>
+                    <td><textarea id="aex7" class="saveable"></textarea></td>
+                </tr>
+                <tr>
+                    <td><strong>CP 8 :</strong> Standardisation & QSE</td>
+                    <td><ul class="critere-list"><li>Procédures</li><li>Normes QSE</li><li>Compréhension équipe</li></ul></td>
+                    <td><input type="number" id="ae8" min="1" max="4" class="saveable radar-input"></td>
+                    <td><textarea id="aex8" class="saveable"></textarea></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="chart-container">
+            <canvas id="radar"></canvas>
         </div>
     </div>
 
-    <script>
-        let radar;
+    <!-- TAB 3 : SUIVI EPCF -->
+    <div id="t3" class="tab-content">
+        <h2>Suivi des EPCF — Activité-type 1 : Piloter les activités du site logistique</h2>
 
-        function showTab(id) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.getElementById('btn-' + id).classList.add('active');
-            if (id === 't2' && radar) radar.update();
+        <!-- ===== EPCF S1 ===== -->
+        <div class="epcf-bloc">
+            <div class="epcf-header">
+                <h3>EPCF S1 — Planification, organisation et régulation d'une activité logistique <span class="badge badge-at">CP1 & CP2</span></h3>
+                <p>Mise en situation : 4h · Entretien technique · Productions : calcul ETP, planning opérateurs, besoins matériels, argumentation orale</p>
+            </div>
+            <div class="epcf-body">
+                <div class="epcf-section">
+                    <h4>📋 Compétences évaluées</h4>
+                    <ul>
+                        <li>CP1 — Organiser et réguler les activités logistiques du site</li>
+                        <li>CP2 — Manager les équipes opérationnelles du site</li>
+                    </ul>
+                </div>
+                <div class="epcf-section">
+                    <h4>📌 Productions attendues</h4>
+                    <ul>
+                        <li>Calcul du besoin en ETP</li>
+                        <li>Planning des opérateurs</li>
+                        <li>Besoins en matériels afférents au planning</li>
+                        <li>Argumentation orale des choix d'organisation et de planification</li>
+                    </ul>
+                </div>
+                <div class="epcf-section">
+                    <h4>✅ Critères d'évaluation — Résultat par critère</h4>
+                    <div class="critere-row"><label>La réglementation sociale est respectée</label><select id="ec_s1_c1" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s1')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les niveaux de productivité et de rentabilité attendus sont atteints</label><select id="ec_s1_c2" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s1')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les dispositifs réglementaires de l'entreposage et du transport sont respectés</label><select id="ec_s1_c3" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s1')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les cahiers des charges sont respectés</label><select id="ec_s1_c4" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s1')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les procédures de l'entreprise sont respectées</label><select id="ec_s1_c5" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s1')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les règles d'hygiène, de sécurité, de sûreté et de qualité sont respectées</label><select id="ec_s1_c6" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s1')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les informations nécessaires à la conduite et au suivi de l'activité sont collectées et transmises</label><select id="ec_s1_c7" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s1')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les orientations stratégiques de l'entreprise sont communiquées aux collaborateurs</label><select id="ec_s1_c8" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s1')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>La réglementation sociale et la politique RH de l'entreprise sont respectées</label><select id="ec_s1_c9" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s1')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les situations de handicap et les aménagements connexes sont pris en compte</label><select id="ec_s1_c10" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s1')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les besoins de formation sont définis</label><select id="ec_s1_c11" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s1')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="score-bar"><div class="score-fill" id="score-fill-s1" style="width:0%"></div></div>
+                    <div class="score-label" id="score-label-s1">Score : —</div>
+                </div>
+                <div class="epcf-obs">
+                    <label>📝 Observations globales EPCF S1 :</label>
+                    <textarea id="obs_s1" class="saveable" style="height:70px;width:100%;border:1px solid #ddd;padding:8px;border-radius:4px;box-sizing:border-box;"></textarea>
+                </div>
+                <div style="margin-top:10px;display:flex;gap:15px;align-items:center;">
+                    <label style="font-size:12px;font-weight:bold;">📅 Date EPCF S1 :</label>
+                    <input type="date" id="date_s1" class="saveable" style="border:1px solid #ddd;padding:5px;border-radius:4px;">
+                    <label style="font-size:12px;font-weight:bold;">Avis final :</label>
+                    <select id="avis_s1" class="saveable" style="border:1px solid #ddd;padding:5px;border-radius:4px;">
+                        <option value="">— Choisir —</option>
+                        <option value="valide">✅ Validé</option>
+                        <option value="partiel">⚠️ Partiellement validé</option>
+                        <option value="nv">❌ Non validé</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== EPCF S2 ===== -->
+        <div class="epcf-bloc">
+            <div class="epcf-header">
+                <h3>EPCF S2 — Détermination, exploitation d'indicateurs logistiques et évaluation des performances <span class="badge badge-at">CP2 & CP3</span></h3>
+                <p>Mise en situation : 1h30 · Entretien technique · Productions : tableau de bord renseigné, compte-rendu analyse des écarts</p>
+            </div>
+            <div class="epcf-body">
+                <div class="epcf-section">
+                    <h4>📋 Compétences évaluées</h4>
+                    <ul>
+                        <li>CP2 — Manager les équipes opérationnelles du site</li>
+                        <li>CP3 — Déterminer et exploiter les indicateurs logistiques</li>
+                    </ul>
+                </div>
+                <div class="epcf-section">
+                    <h4>📌 Productions attendues</h4>
+                    <ul>
+                        <li>Un tableau de bord renseigné</li>
+                        <li>Un compte-rendu comportant une analyse des écarts et des propositions d'améliorations</li>
+                    </ul>
+                </div>
+                <div class="epcf-section">
+                    <h4>✅ Critères d'évaluation — Résultat par critère</h4>
+                    <div class="critere-row"><label>Les procédures de l'entreprise sont respectées</label><select id="ec_s2_c1" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s2')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les indicateurs sont pertinents par rapport aux activités logistiques</label><select id="ec_s2_c2" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s2')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les ratios d'activités logistiques sont communiqués aux interlocuteurs concernés</label><select id="ec_s2_c3" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s2')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les écarts sont identifiés</label><select id="ec_s2_c4" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s2')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les causes des écarts sont identifiées</label><select id="ec_s2_c5" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s2')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les solutions d'amélioration aux écarts identifiés sont déterminées</label><select id="ec_s2_c6" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s2')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les cadres respectifs des entretiens sont respectés</label><select id="ec_s2_c7" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s2')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les actions de régulation sont pertinentes par rapport aux niveaux de service et de productivité</label><select id="ec_s2_c8" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s2')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les performances individuelles et collectives sont évaluées selon les objectifs de l'entreprise</label><select id="ec_s2_c9" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s2')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="score-bar"><div class="score-fill" id="score-fill-s2" style="width:0%"></div></div>
+                    <div class="score-label" id="score-label-s2">Score : —</div>
+                </div>
+                <div class="epcf-obs">
+                    <label>📝 Observations globales EPCF S2 :</label>
+                    <textarea id="obs_s2" class="saveable" style="height:70px;width:100%;border:1px solid #ddd;padding:8px;border-radius:4px;box-sizing:border-box;"></textarea>
+                </div>
+                <div style="margin-top:10px;display:flex;gap:15px;align-items:center;">
+                    <label style="font-size:12px;font-weight:bold;">📅 Date EPCF S2 :</label>
+                    <input type="date" id="date_s2" class="saveable" style="border:1px solid #ddd;padding:5px;border-radius:4px;">
+                    <label style="font-size:12px;font-weight:bold;">Avis final :</label>
+                    <select id="avis_s2" class="saveable" style="border:1px solid #ddd;padding:5px;border-radius:4px;">
+                        <option value="">— Choisir —</option>
+                        <option value="valide">✅ Validé</option>
+                        <option value="partiel">⚠️ Partiellement validé</option>
+                        <option value="nv">❌ Non validé</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== EPCF S3 ===== -->
+        <div class="epcf-bloc">
+            <div class="epcf-header">
+                <h3>EPCF S3 — Analyse et traitement des dérives, communication en anglais <span class="badge badge-at">CP4</span></h3>
+                <p>Mise en situation : 1h · Entretien technique EN ANGLAIS · Productions : argumentation orale en anglais</p>
+            </div>
+            <div class="epcf-body">
+                <div class="epcf-section">
+                    <h4>📋 Compétences évaluées</h4>
+                    <ul>
+                        <li>CP4 — Repérer et traiter les dysfonctionnements et dérives de l'exploitation logistique, y compris en anglais</li>
+                    </ul>
+                </div>
+                <div class="epcf-section">
+                    <h4>📌 Productions attendues</h4>
+                    <ul>
+                        <li>Une argumentation orale en anglais (analyse + actions correctives)</li>
+                    </ul>
+                </div>
+                <div class="epcf-section">
+                    <h4>✅ Critères d'évaluation — Résultat par critère</h4>
+                    <div class="critere-row"><label>Les dysfonctionnements et dérives sont repérés</label><select id="ec_s3_c1" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s3')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les causes des dysfonctionnements et dérives sont identifiées</label><select id="ec_s3_c2" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s3')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les actions correctives sont pertinentes par rapport aux dérives repérées</label><select id="ec_s3_c3" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s3')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les niveaux de rentabilité et de service attendus sont maintenus</label><select id="ec_s3_c4" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s3')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>La communication des actions correctives est faite aux interlocuteurs concernés, y compris en anglais</label><select id="ec_s3_c5" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s3')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="critere-row"><label>Les règles d'hygiène, de sécurité, de sûreté et de qualité sont respectées</label><select id="ec_s3_c6" class="saveable epcf-sel" onchange="updateEpcfStyle(this); updateEpcfScore('s3')"><option value="">— Évaluer —</option><option value="ok">✅ Acquis</option><option value="ec">⚠️ Partiel</option><option value="ko">❌ Non acquis</option></select></div>
+                    <div class="score-bar"><div class="score-fill" id="score-fill-s3" style="width:0%"></div></div>
+                    <div class="score-label" id="score-label-s3">Score : —</div>
+                </div>
+                <div class="epcf-obs">
+                    <label>📝 Observations globales EPCF S3 :</label>
+                    <textarea id="obs_s3" class="saveable" style="height:70px;width:100%;border:1px solid #ddd;padding:8px;border-radius:4px;box-sizing:border-box;"></textarea>
+                </div>
+                <div style="margin-top:10px;display:flex;gap:15px;align-items:center;">
+                    <label style="font-size:12px;font-weight:bold;">📅 Date EPCF S3 :</label>
+                    <input type="date" id="date_s3" class="saveable" style="border:1px solid #ddd;padding:5px;border-radius:4px;">
+                    <label style="font-size:12px;font-weight:bold;">Avis final :</label>
+                    <select id="avis_s3" class="saveable" style="border:1px solid #ddd;padding:5px;border-radius:4px;">
+                        <option value="">— Choisir —</option>
+                        <option value="valide">✅ Validé</option>
+                        <option value="partiel">⚠️ Partiellement validé</option>
+                        <option value="nv">❌ Non validé</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- fin t3 -->
+</div><!-- fin container -->
+
+<script>
+    let radar;
+
+    function showTab(id) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('btn-' + id).classList.add('active');
+        if (id === 't2' && radar) radar.update();
+        if (id === 't3') { ['s1','s2','s3'].forEach(s => updateEpcfScore(s)); }
+    }
+
+    function initRadar() {
+        const ctx = document.getElementById('radar');
+        radar = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['CP1','CP2','CP3','CP4','CP5','CP6','CP7','CP8'],
+                datasets: [{
+                    label: 'Niveau de Maîtrise',
+                    data: [0,0,0,0,0,0,0,0],
+                    backgroundColor: 'rgba(52,152,219,0.2)',
+                    borderColor: '#2980b9',
+                    pointBackgroundColor: '#2c3e50'
+                }]
+            },
+            options: { scales: { r: { min: 0, max: 4, ticks: { stepSize: 1 } } } }
+        });
+    }
+
+    function updateRadar() {
+        const d = [];
+        for (let i = 1; i <= 8; i++) {
+            const val = document.getElementById('ae' + i).value;
+            d.push(parseFloat(val) || 0);
         }
+        radar.data.datasets[0].data = d;
+        radar.update();
+    }
 
-        function initRadar() {
-            const ctx = document.getElementById('radar');
-            radar = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['CP1','CP2','CP3','CP4','CP5','CP6','CP7','CP8'],
-                    datasets: [{
-                        label: 'Niveau de Maîtrise',
-                        data: [0,0,0,0,0,0,0,0],
-                        backgroundColor: 'rgba(52,152,219,0.2)',
-                        borderColor: '#2980b9',
-                        pointBackgroundColor: '#2c3e50'
-                    }]
-                },
-                options: {
-                    scales: {
-                        r: { min: 0, max: 4, ticks: { stepSize: 1 } }
-                    }
+    // Coloration dynamique des selects EPCF
+    function updateEpcfStyle(sel) {
+        sel.className = sel.className.replace(/\b(ok|ec|ko)\b/g, '').trim();
+        if (sel.value) sel.classList.add(sel.value);
+    }
+
+    // Barre de score par EPCF
+    function updateEpcfScore(sId) {
+        const sels = document.querySelectorAll(`[id^="ec_${sId}_"]`);
+        let total = 0, acquis = 0;
+        sels.forEach(s => {
+            if (s.value) {
+                total++;
+                if (s.value === 'ok') acquis++;
+                else if (s.value === 'ec') acquis += 0.5;
+            }
+        });
+        const pct = total > 0 ? Math.round((acquis / sels.length) * 100) : 0;
+        document.getElementById(`score-fill-${sId}`).style.width = pct + '%';
+        document.getElementById(`score-label-${sId}`).textContent =
+            total > 0 ? `Score : ${acquis}/${sels.length} critères (${pct}%)` : 'Score : — (critères non renseignés)';
+    }
+
+    const saveables = document.querySelectorAll('.saveable');
+
+    function save(e) {
+        const data = {};
+        saveables.forEach(f => data[f.id] = f.value);
+        localStorage.setItem('tsmel_progression_v4', JSON.stringify(data));
+        if (e.target.classList && e.target.classList.contains('radar-input')) updateRadar();
+    }
+
+    function load() {
+        const data = JSON.parse(localStorage.getItem('tsmel_progression_v4'));
+        if (data) {
+            saveables.forEach(f => {
+                if (data[f.id] !== undefined) {
+                    f.value = data[f.id];
+                    if (f.classList.contains('epcf-sel')) updateEpcfStyle(f);
                 }
             });
         }
+        if (radar) updateRadar();
+        ['s1','s2','s3'].forEach(s => updateEpcfScore(s));
+    }
 
-        function updateRadar() {
-            const d = [];
-            for (let i = 1; i <= 8; i++) {
-                const val = document.getElementById('ae' + i).value;
-                d.push(parseFloat(val) || 0);
-            }
-            radar.data.datasets[0].data = d;
-            radar.update();
+    saveables.forEach(f => f.addEventListener('input', save));
+    window.onload = () => { initRadar(); load(); };
+
+    function clearData() {
+        if (confirm("Effacer tout le suivi ?")) {
+            localStorage.removeItem('tsmel_progression_v4');
+            location.reload();
         }
+    }
 
-        const saveables = document.querySelectorAll('.saveable');
-
-        // ✅ CORRECTION 1 : utilisation de e.target au lieu de this
-        function save(e) {
-            const data = {};
-            saveables.forEach(f => data[f.id] = f.value);
-            localStorage.setItem('tsmel_progression_v3', JSON.stringify(data));
-            if (e.target.classList && e.target.classList.contains('radar-input')) {
-                updateRadar();
-            }
-        }
-
-        function load() {
-            const data = JSON.parse(localStorage.getItem('tsmel_progression_v3'));
-            if (data) {
-                saveables.forEach(f => {
-                    if (data[f.id] !== undefined) f.value = data[f.id];
-                });
-            }
-            if (radar) updateRadar();
-        }
-
-        saveables.forEach(f => f.addEventListener('input', save));
-        window.onload = () => { initRadar(); load(); };
-
-        function clearData() {
-            if (confirm("Effacer tout le suivi ?")) {
-                localStorage.removeItem('tsmel_progression_v3');
-                location.reload();
-            }
-        }
-
-        // ✅ CORRECTION 2 : \n au lieu de sauts de ligne littéraux
-        // ✅ CORRECTION 3 : "\ufeff" au lieu de "\\ufeff"
-        function exportToCSV() {
-            let csv = "ID;Valeur\n";
-            saveables.forEach(f => {
-                csv += `${f.id};"${f.value.replace(/"/g, '""')}"\n`;
-            });
-            const b = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(b);
-            a.download = "suivi_tsmel.csv";
-            a.click();
-        }
-    </script>
+    function exportToCSV() {
+        let csv = "ID;Valeur\n";
+        saveables.forEach(f => {
+            csv += `${f.id};"${f.value.replace(/"/g, '""')}"\n`;
+        });
+        const b = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(b);
+        a.download = "suivi_tsmel.csv";
+        a.click();
+    }
+</script>
 </body>
 </html>
