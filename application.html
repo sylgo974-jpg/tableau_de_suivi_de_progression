@@ -58,7 +58,7 @@
             <button class="tab-btn" id="btn-t2" onclick="showTab('t2')">2. Auto-évaluation & Progression</button>
         </div>
 
-        <!-- TAB 1 -->
+        <!-- TAB 1 : EVALUATION FORMATEUR -->
         <div id="t1" class="tab-content active">
             <h2>Période 1 : Piloter les activités du site logistique (AT1 & AT2)</h2>
             <table>
@@ -123,29 +123,73 @@
             </table>
         </div>
 
-        <!-- TAB 2 -->
+        <!-- TAB 2 : AUTO-EVALUATION -->
         <div id="t2" class="tab-content">
-            <h2>Ma Progression (Auto-évaluation)</h2>
-            <div class="chart-container"><canvas id="radar"></canvas></div>
+            <h2>Ma Progression (Auto-évaluation C1-C8)</h2>
             <table>
                 <thead>
                     <tr>
-                        <th width="40%">Compétence</th>
-                        <th width="15%">Note (1-4)</th>
-                        <th width="45%">Auto-analyse & Preuves de maîtrise</th>
+                        <th width="30%">Compétence</th>
+                        <th width="40%">Objectifs & Attendus (REAC v10)</th>
+                        <th width="10%">Note (1-4)</th>
+                        <th width="20%">Auto-analyse & Preuves</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>CP 1 : Organisation & Flux</td><td><input type="number" id="ae1" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n1" class="saveable"></textarea></td></tr>
-                    <tr><td>CP 2 : Management d'Équipe</td><td><input type="number" id="ae2" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n2" class="saveable"></textarea></td></tr>
-                    <tr><td>CP 3 : Pilotage par Indicateurs</td><td><input type="number" id="ae3" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n3" class="saveable"></textarea></td></tr>
-                    <tr><td>CP 4 : Qualité & Anglais Pro</td><td><input type="number" id="ae4" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n4" class="saveable"></textarea></td></tr>
-                    <tr><td>CP 5 : Étude de Faisabilité</td><td><input type="number" id="ae5" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n5" class="saveable"></textarea></td></tr>
-                    <tr><td>CP 6 : Gestion de Projet</td><td><input type="number" id="ae6" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n6" class="saveable"></textarea></td></tr>
-                    <tr><td>CP 7 : Agencement & WMS</td><td><input type="number" id="ae7" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n7" class="saveable"></textarea></td></tr>
-                    <tr><td>CP 8 : Standardisation & QSE</td><td><input type="number" id="ae8" min="1" max="4" class="saveable radar-input"></td><td><textarea id="n8" class="saveable"></textarea></td></tr>
+                    <tr>
+                        <td><strong>CP 1 :</strong> Organisation & Flux</td>
+                        <td><ul class="critere-list"><li>Réglementation sociale</li><li>Productivité</li><li>Cahier des charges</li></ul></td>
+                        <td><input type="number" id="ae1" min="1" max="4" class="saveable radar-input"></td>
+                        <td><textarea id="aex1" class="saveable"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td><strong>CP 2 :</strong> Management d'Équipe</td>
+                        <td><ul class="critere-list"><li>Orientations stratégiques</li><li>Politique RH</li><li>Besoins formation</li></ul></td>
+                        <td><input type="number" id="ae2" min="1" max="4" class="saveable radar-input"></td>
+                        <td><textarea id="aex2" class="saveable"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td><strong>CP 3 :</strong> Pilotage par Indicateurs</td>
+                        <td><ul class="critere-list"><li>KPI pertinents</li><li>Analyse écarts</li><li>Améliorations</li></ul></td>
+                        <td><input type="number" id="ae3" min="1" max="4" class="saveable radar-input"></td>
+                        <td><textarea id="aex3" class="saveable"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td><strong>CP 4 :</strong> Qualité & Anglais Pro</td>
+                        <td><ul class="critere-list"><li>Dysfonctionnements</li><li>Actions correctives</li><li>Anglais Pro</li></ul></td>
+                        <td><input type="number" id="ae4" min="1" max="4" class="saveable radar-input"></td>
+                        <td><textarea id="aex4" class="saveable"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td><strong>CP 5 :</strong> Étude de Faisabilité</td>
+                        <td><ul class="critere-list"><li>Analyse besoins</li><li>Optimisation coût/qualité</li><li>Conditions travail</li></ul></td>
+                        <td><input type="number" id="ae5" min="1" max="4" class="saveable radar-input"></td>
+                        <td><textarea id="aex5" class="saveable"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td><strong>CP 6 :</strong> Gestion de Projet</td>
+                        <td><ul class="critere-list"><li>Planning/Actions</li><li>Chemin critique</li><li>Budget</li></ul></td>
+                        <td><input type="number" id="ae6" min="1" max="4" class="saveable radar-input"></td>
+                        <td><textarea id="aex6" class="saveable"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td><strong>CP 7 :</strong> Agencement & WMS</td>
+                        <td><ul class="critere-list"><li>Optimisation flux</li><li>Sécurité/Sûreté</li><li>Implantation</li></ul></td>
+                        <td><input type="number" id="ae7" min="1" max="4" class="saveable radar-input"></td>
+                        <td><textarea id="aex7" class="saveable"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td><strong>CP 8 :</strong> Standardisation & QSE</td>
+                        <td><ul class="critere-list"><li>Procédures</li><li>Normes QSE</li><li>Compréhension équipe</li></ul></td>
+                        <td><input type="number" id="ae8" min="1" max="4" class="saveable radar-input"></td>
+                        <td><textarea id="aex8" class="saveable"></textarea></td>
+                    </tr>
                 </tbody>
             </table>
+
+            <div class="chart-container">
+                <canvas id="radar"></canvas>
+            </div>
         </div>
     </div>
 
@@ -173,7 +217,11 @@
                         pointBackgroundColor: '#2c3e50'
                     }]
                 },
-                options: { scales: { r: { min: 0, max: 4, ticks: { stepSize: 1 } } } }
+                options: {
+                    scales: {
+                        r: { min: 0, max: 4, ticks: { stepSize: 1 } }
+                    }
+                }
             });
         }
 
@@ -188,6 +236,7 @@
         }
 
         const saveables = document.querySelectorAll('.saveable');
+
         function save() {
             const data = {};
             saveables.forEach(f => data[f.id] = f.value);
@@ -197,9 +246,11 @@
 
         function load() {
             const data = JSON.parse(localStorage.getItem('tsmel_progression_v3'));
-            if(data) saveables.forEach(f => {
-                if(data[f.id] !== undefined) f.value = data[f.id];
-            });
+            if(data) {
+                saveables.forEach(f => {
+                    if(data[f.id] !== undefined) f.value = data[f.id];
+                });
+            }
             if(radar) updateRadar();
         }
 
@@ -214,9 +265,11 @@
         }
 
         function exportToCSV() {
-            let csv = "ID;Valeur\n";
+            let csv = "ID;Valeur
+";
             saveables.forEach(f => {
-                csv += `${f.id};"${f.value.replace(/"/g, '""')}"\n`;
+                csv += `${f.id};"${f.value.replace(/"/g, '""')}"
+`;
             });
             const b = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
             const a = document.createElement("a");
